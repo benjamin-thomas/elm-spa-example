@@ -333,9 +333,9 @@ authHeader =
         ]
 
 
-error : a -> Html msg
-error a =
-    main_ [ class "container" ] [ text <| Debug.toString a ]
+error : String -> Html msg
+error msg =
+    main_ [ class "container" ] [ text msg ]
 
 
 
