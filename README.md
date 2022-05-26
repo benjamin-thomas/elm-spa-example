@@ -5,7 +5,7 @@ Following tutorial at: https://medium.com/@grrinchas/building-a-single-page-appl
 
 ## Run dev server
 
-
+`--hot` restores the previous app state after reload, `--pushstate` serves all requests with start-page (required behavior for `Browser.application`).
 ```bash
-elm-live ./src/Main.elm --start-page=index2.html --pushstate -- --debug --output=dist/main.js
+elm-live ./src/Main.elm --start-page=index2.html --hot --pushstate -- --debug --output=dist/main.js
 ```
