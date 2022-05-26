@@ -3,7 +3,10 @@ module Components exposing (..)
 import Debug exposing (toString)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
+import Messages exposing (Msg(..))
 import Models exposing (Post, User)
+import Route exposing (parseRoute, path)
 
 
 layout : Html msg -> Html msg -> Html msg
@@ -18,15 +21,15 @@ authHeader =
         [ nav []
             [ div [ class "nav-wrapper container" ]
                 [ ul [ class "right" ]
-                    [ li [] [ a [ class "btn" ] [ text "Login" ] ]
-                    , li [] [ a [ class "btn" ] [ text "Sign Up" ] ]
+                    [ li [] [ a [ class "btn", href (path Route.Login) ] [ text "Login" ] ]
+                    , li [] [ a [ class "btn", href (path Route.SignUp) ] [ text "Sign Up" ] ]
                     ]
                 ]
             ]
         ]
 
 
-landingBody : List Post -> Html msg
+landingBody : List Post -> Html Msg
 landingBody posts =
     main_ [ class "container" ]
         [ List.map postCard posts
@@ -34,9 +37,13 @@ landingBody posts =
         ]
 
 
-postCard : Post -> Html msg
+
+-- div [ class "col s12 m6 l4", onClick (UpdateRoute <| Route.ReadPost post.id) ]
+
+
+postCard : Post -> Html Msg
 postCard post =
-    div [ class "col s12 m6 l4" ]
+    div [ class "col s12 m6 l4", onClick (UpdateRoute <| parseRoute <| Route.ReadPost post.id) ]
         [ div [ class "card small hoverable grey lighten-4" ]
             [ div [ class "card-content" ]
                 [ span [ class "card-title medium" ]
@@ -64,7 +71,7 @@ userHeader user =
     header []
         [ nav []
             [ div [ class "nav-wrapper container" ]
-                [ a [ class "btn" ] [ text "New Post" ]
+                [ a [ class "btn", href (path Route.CreatePost) ] [ text "New Post" ]
                 , ul [ class "right" ]
                     [ li [] [ text user.email ]
                     , li [] [ a [ class "btn" ] [ text "Logout" ] ]
