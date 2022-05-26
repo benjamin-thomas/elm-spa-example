@@ -1,4 +1,9 @@
+# Blog tutorial
+
 Following tutorial at: https://medium.com/@grrinchas/building-a-single-page-application-in-elm-planning-and-scaffolding-part-2-279b4924c578
+
+
+## Run dev server
 
 
 ```bash
