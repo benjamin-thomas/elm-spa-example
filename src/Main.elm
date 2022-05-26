@@ -4,7 +4,6 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
 import Lorem
 import Url exposing (Url)
 import Url.Parser exposing ((</>), Parser, map, oneOf, parse, s, string, top)
@@ -21,8 +20,8 @@ main =
         , view = view
         , update = update
         , subscriptions = subscriptions
-        , onUrlChange = onUrlChange
-        , onUrlRequest = onUrlRequest
+        , onUrlChange = UrlChanged
+        , onUrlRequest = LinkClicked
         }
 
 
@@ -38,7 +37,7 @@ type alias User =
 type alias Model =
     { posts : List Post
     , user : User
-    , route : Route
+    , url : Url
     , key : Nav.Key
     }
 
@@ -58,7 +57,7 @@ initModel url key =
             |> List.map String.fromInt
             |> List.map fakePost
     , user = { email = "dummy@example.com" }
-    , route = parseUrl url
+    , url = url
     , key = key
     }
 
@@ -73,18 +72,23 @@ init _ url key =
 
 
 type Msg
-    = OnUrlChange Url
-    | UpdateRoute Url
+    = UrlChanged Url
+    | LinkClicked Browser.UrlRequest
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        OnUrlChange url ->
-            ( { model | route = parseUrl url }, Cmd.none )
+        UrlChanged url ->
+            ( { model | url = url }, Cmd.none )
 
-        UpdateRoute url ->
-            ( model, Nav.pushUrl model.key (Url.toString url) )
+        LinkClicked urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl model.key (Url.toString url) )
+
+                Browser.External href ->
+                    ( model, Nav.load href )
 
 
 
@@ -97,20 +101,6 @@ subscriptions _ =
 
 
 
--- NAVIGATION
-
-
-onUrlRequest : Browser.UrlRequest -> Msg
-onUrlRequest request =
-    UpdateRoute (parseRoute <| parseUrlRequest request)
-
-
-onUrlChange : Url -> Msg
-onUrlChange url =
-    OnUrlChange url
-
-
-
 -- VIEW
 
 
@@ -118,7 +108,7 @@ view : Model -> Browser.Document Msg
 view model =
     let
         body =
-            case model.route of
+            case parseUrl model.url of
                 Home ->
                     viewHome model
 
@@ -154,9 +144,9 @@ viewHomeBody posts =
 
 postCard : Post -> Html Msg
 postCard post =
-    div [ class "col s12 m6 l4", onClick (UpdateRoute <| parseRoute <| ReadPost post.id) ]
+    div [ class "col s12 m6 l4" ]
         [ div [ class "card small hoverable grey lighten-4" ]
-            [ div [ class "card-content" ]
+            [ a [ class "card-content", href <| path (ReadPost post.id) ]
                 [ span [ class "card-title medium" ]
                     [ text <| "ID " ++ post.id ++ ": " ++ post.title ]
                 , p [] [ text post.body ]
@@ -377,27 +367,6 @@ parseUrl url =
             route
 
         Nothing ->
-            NotFound
-
-
-parseRoute : Route -> Url
-parseRoute route =
-    { protocol = Url.Http
-    , host = "localhost"
-    , port_ = Just 8000
-    , path = path route
-    , query = Nothing
-    , fragment = Nothing
-    }
-
-
-parseUrlRequest : Browser.UrlRequest -> Route
-parseUrlRequest request =
-    case request of
-        Browser.Internal url ->
-            parseUrl url
-
-        Browser.External _ ->
             NotFound
 
 
