@@ -1,6 +1,6 @@
 module Pages exposing (..)
 
-import Components exposing (authHeader, error, landingBody, layout, readPostBody)
+import Components exposing (authHeader, createPostBody, error, landingBody, layout, readPostBody, userHeader)
 import Html exposing (Html)
 import Models exposing (Model)
 
@@ -18,3 +18,8 @@ readPost id model =
 
         Nothing ->
             error "404 not found"
+
+
+createPost : Model -> Html msg
+createPost model =
+    layout (userHeader model.user) createPostBody

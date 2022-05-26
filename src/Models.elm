@@ -10,8 +10,14 @@ type alias Post =
     }
 
 
+type alias User =
+    { email : String
+    }
+
+
 type alias Model =
     { posts : List Post
+    , user : User
     }
 
 
@@ -23,10 +29,11 @@ initPost id =
     }
 
 
-initModel : { posts : List Post }
+initModel : Model
 initModel =
     { posts =
         List.range 1 10
             |> List.map String.fromInt
             |> List.map initPost
+    , user = { email = "dummy@example.com" }
     }
