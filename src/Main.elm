@@ -64,7 +64,7 @@ initModel url key =
 
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
+init _ url key =
     ( initModel url key, Cmd.none )
 
 
@@ -92,7 +92,7 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
@@ -276,7 +276,7 @@ passwordAgain =
 
 
 login : Model -> Html msg
-login model =
+login _ =
     authentication
         [ emailInput
         , passwordInput
@@ -289,7 +289,7 @@ login model =
 
 
 signUp : Model -> Html msg
-signUp model =
+signUp _ =
     authentication
         [ emailInput
         , passwordInput
