@@ -10,52 +10,24 @@ import Url exposing (Url)
 import Url.Parser exposing ((</>), Parser, map, oneOf, parse, s, string, top)
 
 
-type Msg
-    = OnUrlChange Url
-    | UpdateRoute Url
+
+-- MAIN
 
 
 main : Program () Model Msg
 main =
     Browser.application
-        { init = \() url key -> ( initModel key, Cmd.none )
+        { init = init
         , view = view
         , update = update
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         , onUrlChange = onUrlChange
         , onUrlRequest = onUrlRequest
         }
 
 
-onUrlRequest : Browser.UrlRequest -> Msg
-onUrlRequest request =
-    UpdateRoute (parseRoute <| parseUrlRequest request)
 
-
-onUrlChange : Url -> Msg
-onUrlChange url =
-    OnUrlChange url
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        OnUrlChange url ->
-            let
-                route =
-                    parseUrl url
-            in
-            ( { model | route = route }, Cmd.none )
-
-        UpdateRoute url ->
-            ( model, Nav.pushUrl model.key (Url.toString url) )
-
-
-type alias Post =
-    { id : String
-    , title : String
-    , body : String
-    }
+-- MODEL
 
 
 type alias User =
@@ -71,8 +43,8 @@ type alias Model =
     }
 
 
-initPost : String -> Post
-initPost id =
+fakePost : String -> Post
+fakePost id =
     { id = id
     , title = Lorem.sentence 4
     , body = Lorem.paragraphs 2 |> String.concat
@@ -84,31 +56,62 @@ initModel key =
     { posts =
         List.range 1 10
             |> List.map String.fromInt
-            |> List.map initPost
+            |> List.map fakePost
     , user = { email = "dummy@example.com" }
     , route = Home
     , key = key
     }
 
 
-landing : Model -> Html Msg
-landing model =
-    layout authHeader <| landingBody model.posts
+init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url key =
+    ( initModel key, Cmd.none )
 
 
-readPost : String -> Model -> Html msg
-readPost id model =
-    case List.head <| List.filter (\post -> post.id == id) model.posts of
-        Just post ->
-            layout authHeader <| readPostBody post
 
-        Nothing ->
-            error "404 not found"
+-- UPDATE
 
 
-createPost : Model -> Html msg
-createPost model =
-    layout (userHeader model.user) createPostBody
+type Msg
+    = OnUrlChange Url
+    | UpdateRoute Url
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        OnUrlChange url ->
+            ( { model | route = parseUrl url }, Cmd.none )
+
+        UpdateRoute url ->
+            ( model, Nav.pushUrl model.key (Url.toString url) )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+
+
+-- NAVIGATION
+
+
+onUrlRequest : Browser.UrlRequest -> Msg
+onUrlRequest request =
+    UpdateRoute (parseRoute <| parseUrlRequest request)
+
+
+onUrlChange : Url -> Msg
+onUrlChange url =
+    OnUrlChange url
+
+
+
+-- VIEW
 
 
 view : Model -> Browser.Document Msg
@@ -117,7 +120,7 @@ view model =
         body =
             case model.route of
                 Home ->
-                    landing model
+                    viewHome model
 
                 ReadPost id ->
                     readPost id model
@@ -137,36 +140,16 @@ view model =
     { title = "Blog", body = [ body ] }
 
 
-layout : Html msg -> Html msg -> Html msg
-layout header body =
-    div []
-        [ header, body ]
+
+-- VIEW HOME
 
 
-authHeader : Html msg
-authHeader =
-    header []
-        [ nav []
-            [ div [ class "nav-wrapper container" ]
-                [ ul [ class "right" ]
-                    [ li [] [ a [ class "btn", href (path Login) ] [ text "Login" ] ]
-                    , li [] [ a [ class "btn", href (path SignUp) ] [ text "Sign Up" ] ]
-                    ]
-                ]
-            ]
-        ]
-
-
-landingBody : List Post -> Html Msg
-landingBody posts =
+viewHomeBody : List Post -> Html Msg
+viewHomeBody posts =
     main_ [ class "container" ]
         [ List.map postCard posts
             |> div [ class "row" ]
         ]
-
-
-
--- div [ class "col s12 m6 l4", onClick (UpdateRoute <| Route.ReadPost post.id) ]
 
 
 postCard : Post -> Html Msg
@@ -182,6 +165,15 @@ postCard post =
         ]
 
 
+viewHome : Model -> Html Msg
+viewHome model =
+    layout authHeader <| viewHomeBody model.posts
+
+
+
+-- VIEW SHOW POST
+
+
 readPostBody : Post -> Html msg
 readPostBody post =
     main_ [ class "container" ]
@@ -192,6 +184,20 @@ readPostBody post =
                 ]
             ]
         ]
+
+
+readPost : String -> Model -> Html msg
+readPost id model =
+    case List.head <| List.filter (\post -> post.id == id) model.posts of
+        Just post ->
+            layout authHeader <| readPostBody post
+
+        Nothing ->
+            error "404 not found"
+
+
+
+-- VIEW CREATE POST
 
 
 userHeader : User -> Html msg
@@ -222,9 +228,23 @@ createPostBody =
         ]
 
 
-error : a -> Html msg
-error a =
-    main_ [ class "container" ] [ text <| Debug.toString a ]
+createPost : Model -> Html msg
+createPost model =
+    layout (userHeader model.user) createPostBody
+
+
+
+-- VIEW LOGIN/SIGNUP
+
+
+authentication : List (Html msg) -> Html msg
+authentication body =
+    main_ [ class "container " ]
+        [ div [ class "full-height row valign-wrapper" ]
+            [ Html.form [ class "col s12 m4 offset-m4" ]
+                body
+            ]
+        ]
 
 
 emailInput : Html msg
@@ -251,14 +271,8 @@ passwordAgain =
         ]
 
 
-authentication : List (Html msg) -> Html msg
-authentication body =
-    main_ [ class "container " ]
-        [ div [ class "full-height row valign-wrapper" ]
-            [ Html.form [ class "col s12 m4 offset-m4" ]
-                body
-            ]
-        ]
+
+-- VIEW LOGIN
 
 
 login : Model -> Html msg
@@ -270,6 +284,10 @@ login model =
         ]
 
 
+
+-- VIEW SIGNUP
+
+
 signUp : Model -> Html msg
 signUp model =
     authentication
@@ -278,6 +296,50 @@ signUp model =
         , passwordAgain
         , a [ class "btn right" ] [ text "Sign Up" ]
         ]
+
+
+
+-- SHARED MODEL
+
+
+type alias Post =
+    { id : String
+    , title : String
+    , body : String
+    }
+
+
+
+-- SHARED VIEW
+
+
+layout : Html msg -> Html msg -> Html msg
+layout header body =
+    div []
+        [ header, body ]
+
+
+authHeader : Html msg
+authHeader =
+    header []
+        [ nav []
+            [ div [ class "nav-wrapper container" ]
+                [ ul [ class "right" ]
+                    [ li [] [ a [ class "btn", href (path Login) ] [ text "Login" ] ]
+                    , li [] [ a [ class "btn", href (path SignUp) ] [ text "Sign Up" ] ]
+                    ]
+                ]
+            ]
+        ]
+
+
+error : a -> Html msg
+error a =
+    main_ [ class "container" ] [ text <| Debug.toString a ]
+
+
+
+-- ROUTING
 
 
 type Route
