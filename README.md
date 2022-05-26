@@ -2,5 +2,5 @@ Following tutorial at: https://medium.com/@grrinchas/building-a-single-page-appl
 
 
 ```bash
-elm-live ./src/Main.elm --start-page=index2.html -- --debug --output=dist/main.js
+elm-live ./src/Main.elm --start-page=index2.html --pushstate -- --debug --output=dist/main.js
 ```

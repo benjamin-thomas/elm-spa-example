@@ -51,21 +51,21 @@ fakePost id =
     }
 
 
-initModel : Nav.Key -> Model
-initModel key =
+initModel : Url -> Nav.Key -> Model
+initModel url key =
     { posts =
         List.range 1 10
             |> List.map String.fromInt
             |> List.map fakePost
     , user = { email = "dummy@example.com" }
-    , route = Home
+    , route = parseUrl url
     , key = key
     }
 
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( initModel key, Cmd.none )
+    ( initModel url key, Cmd.none )
 
 
 
