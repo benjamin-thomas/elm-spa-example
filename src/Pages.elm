@@ -23,3 +23,13 @@ readPost id model =
 createPost : Model -> Html msg
 createPost model =
     layout (userHeader model.user) createPostBody
+
+
+login : Model -> Html msg
+login model =
+    Components.login
+
+
+signUp : Model -> Html msg
+signUp model =
+    Components.signUp
