@@ -4,9 +4,10 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Lorem
+import Http
+import Json.Decode as D exposing (Decoder, field, map4)
 import Url exposing (Url)
-import Url.Parser exposing ((</>), Parser, map, oneOf, parse, s, string, top)
+import Url.Parser as P exposing ((</>), Parser, oneOf, parse, top)
 
 
 
@@ -34,28 +35,23 @@ type alias User =
     }
 
 
+type State
+    = Loading
+    | Failure
+    | Success (List Post)
+
+
 type alias Model =
-    { posts : List Post
+    { state : State
     , user : User
     , url : Url
     , key : Nav.Key
     }
 
 
-fakePost : String -> Post
-fakePost id =
-    { id = id
-    , title = Lorem.sentence 4
-    , body = Lorem.paragraphs 2 |> String.concat
-    }
-
-
 initModel : Url -> Nav.Key -> Model
 initModel url key =
-    { posts =
-        List.range 1 10
-            |> List.map String.fromInt
-            |> List.map fakePost
+    { state = Loading
     , user = { email = "dummy@example.com" }
     , url = url
     , key = key
@@ -64,7 +60,7 @@ initModel url key =
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url key =
-    ( initModel url key, Cmd.none )
+    ( initModel url key, fetchPosts )
 
 
 
@@ -74,6 +70,7 @@ init _ url key =
 type Msg
     = UrlChanged Url
     | LinkClicked Browser.UrlRequest
+    | GotPosts (Result Http.Error (List Post))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -89,6 +86,14 @@ update msg model =
 
                 Browser.External href ->
                     ( model, Nav.load href )
+
+        GotPosts result ->
+            case result of
+                Ok posts ->
+                    ( { model | state = Success posts }, Cmd.none )
+
+                Err _ ->
+                    ( { model | state = Failure }, Cmd.none )
 
 
 
@@ -110,7 +115,15 @@ view model =
         body =
             case parseUrl model.url of
                 Home ->
-                    viewHome model
+                    case model.state of
+                        Success posts ->
+                            viewHome posts
+
+                        Loading ->
+                            p [] [ text "Loading..." ]
+
+                        Failure ->
+                            p [] [ text "Error loading posts!" ]
 
                 ReadPost id ->
                     readPost id model
@@ -148,16 +161,16 @@ postCard post =
         [ div [ class "card small hoverable grey lighten-4" ]
             [ a [ class "card-content", href <| path (ReadPost post.id) ]
                 [ span [ class "card-title medium" ]
-                    [ text <| "ID " ++ post.id ++ ": " ++ post.title ]
+                    [ text <| "ID " ++ String.fromInt post.id ++ ": " ++ post.title ]
                 , p [] [ text post.body ]
                 ]
             ]
         ]
 
 
-viewHome : Model -> Html Msg
-viewHome model =
-    layout authHeader <| viewHomeBody model.posts
+viewHome : List Post -> Html Msg
+viewHome posts =
+    layout authHeader <| viewHomeBody posts
 
 
 
@@ -169,21 +182,29 @@ readPostBody post =
     main_ [ class "container" ]
         [ div [ class "row" ]
             [ div [ class "col l6 offset-l3" ]
-                [ h1 [] [ text <| "ID " ++ post.id ++ ": " ++ post.title ]
+                [ h1 [] [ text <| "ID " ++ String.fromInt post.id ++ ": " ++ post.title ]
                 , List.repeat 10 post.body |> List.map (\par -> p [] [ text par ]) |> div []
                 ]
             ]
         ]
 
 
-readPost : String -> Model -> Html msg
+readPost : Int -> Model -> Html msg
 readPost id model =
-    case List.head <| List.filter (\post -> post.id == id) model.posts of
-        Just post ->
-            layout authHeader <| readPostBody post
+    case model.state of
+        Success posts ->
+            case List.head <| List.filter (\post -> post.id == id) posts of
+                Just post ->
+                    layout authHeader <| readPostBody post
 
-        Nothing ->
-            error "404 not found"
+                Nothing ->
+                    error "404 not found"
+
+        Loading ->
+            p [] [ text "Loading..." ]
+
+        Failure ->
+            p [] [ text "Error loading posts!" ]
 
 
 
@@ -293,7 +314,8 @@ signUp _ =
 
 
 type alias Post =
-    { id : String
+    { id : Int
+    , userId : Int
     , title : String
     , body : String
     }
@@ -334,7 +356,7 @@ error msg =
 
 type Route
     = Home
-    | ReadPost String
+    | ReadPost Int
     | CreatePost
     | Login
     | SignUp
@@ -343,20 +365,13 @@ type Route
 
 matchRoute : Parser (Route -> a) a
 matchRoute =
-    let
-        map =
-            Url.Parser.map
-
-        s =
-            Url.Parser.s
-    in
     oneOf
-        [ map Home top
-        , map Home (s "posts")
-        , map ReadPost (s "posts" </> string)
-        , map CreatePost (s "post")
-        , map Login (s "login")
-        , map SignUp (s "signup")
+        [ P.map Home top
+        , P.map Home (P.s "posts")
+        , P.map ReadPost (P.s "posts" </> P.int)
+        , P.map CreatePost (P.s "post")
+        , P.map Login (P.s "login")
+        , P.map SignUp (P.s "signup")
         ]
 
 
@@ -377,7 +392,7 @@ path route =
             "/"
 
         ReadPost id ->
-            "/posts/" ++ id
+            "/posts/" ++ String.fromInt id
 
         CreatePost ->
             "/post"
@@ -390,3 +405,29 @@ path route =
 
         NotFound ->
             "/"
+
+
+
+-- HTTP
+
+
+fetchPosts : Cmd Msg
+fetchPosts =
+    Http.get
+        { url = "https://jsonplaceholder.typicode.com/posts?_limit=10"
+        , expect = Http.expectJson GotPosts postsDecoder
+        }
+
+
+postDecoder : Decoder Post
+postDecoder =
+    map4 Post
+        (field "id" D.int)
+        (field "userId" D.int)
+        (field "title" D.string)
+        (field "body" D.string)
+
+
+postsDecoder : Decoder (List Post)
+postsDecoder =
+    D.list postDecoder
