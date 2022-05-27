@@ -4,9 +4,9 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Posts.List
+import ListPosts
+import Route exposing (Route)
 import Url exposing (Url)
-import Url.Parser as P exposing ((</>), Parser, oneOf, parse, top)
 
 
 
@@ -37,7 +37,7 @@ type alias Model =
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url key =
-    ( Model key (parseUrl url), Cmd.none )
+    ( Model key (Route.fromUrl url), Cmd.none )
 
 
 
@@ -53,7 +53,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UrlChanged url ->
-            ( { model | route = parseUrl url }, Cmd.none )
+            ( { model | route = Route.fromUrl url }, Cmd.none )
 
         LinkClicked urlRequest ->
             case urlRequest of
@@ -91,54 +91,13 @@ view model =
 
         pageBody =
             case model.route of
-                Home ->
+                Route.Home ->
                     p [] [ text "extra home" ]
 
-                ListPosts ->
-                    p [] [ text "extra list of posts" ]
+                Route.ListPosts ->
+                    p [] [ text "extra list posts" ]
 
                 _ ->
                     p [] [ text "extra other" ]
     in
     { title = "Blog", body = [ showLinks, pageBody ] }
-
-
-
--- ROUTING
-
-
-type Route
-    = Home
-    | ListPosts
-    | NotFound
-
-
-matchRoute : Parser (Route -> a) a
-matchRoute =
-    oneOf
-        [ P.map Home top
-        , P.map ListPosts (P.s "posts")
-        ]
-
-
-parseUrl : Url -> Route
-parseUrl url =
-    case parse matchRoute url of
-        Just route ->
-            route
-
-        Nothing ->
-            NotFound
-
-
-path : Route -> String
-path route =
-    case route of
-        Home ->
-            "/"
-
-        ListPosts ->
-            Posts.List.path Nothing
-
-        NotFound ->
-            "/"
