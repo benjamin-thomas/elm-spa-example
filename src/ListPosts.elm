@@ -1,4 +1,4 @@
-module Posts.List exposing (Model, Msg(..), init, path, update, view)
+module ListPosts exposing (Model(..), Msg(..), init, path, update, view)
 
 import Html exposing (Html, a, div, main_, p, text)
 import Html.Attributes exposing (class, href)
