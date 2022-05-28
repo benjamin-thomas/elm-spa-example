@@ -1,13 +1,17 @@
 # Blog tutorial
 
-Following tutorial at: https://medium.com/@grrinchas/building-a-single-page-application-in-elm-planning-and-scaffolding-part-2-279b4924c578
+Original tutorial found at: https://medium.com/@grrinchas/building-a-single-page-application-in-elm-planning-and-scaffolding-part-2-279b4924c578
+
+It was designed prior to Elm `0.19.1` so it mostly served as inspiration from early implementations.
+
+## Objectives
+
+- demonstrate routing (as a SPA)
+- explore how to organize code
 
 ## Requirements
 
-```bash
-npm install -g json-server
-http --help # httpie
-```
+Basic elm toolchain and `elm-live`.
 
 
 ## Run dev server
