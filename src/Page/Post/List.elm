@@ -3,7 +3,7 @@ module Page.Post.List exposing (Model(..), Msg(..), init, update, view)
 import Html exposing (Html, a, div, main_, p, span, text)
 import Html.Attributes exposing (class, href)
 import Http
-import Json.Decode exposing (Decoder, list)
+import Json.Decode exposing (list)
 import Page.Post.Shared exposing (Post, postDecoder)
 import Route
 
