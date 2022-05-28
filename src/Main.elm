@@ -6,6 +6,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Page.Creds.Login
 import Page.Creds.SignUp
+import Page.Home
 import Page.Post.List
 import Page.Post.Show
 import Route exposing (Route)
@@ -166,15 +167,7 @@ view model =
             { title = "Home"
             , body =
                 [ nav_
-                , main_ [ class "container" ]
-                    [ div [ class "row" ]
-                        [ div [ class "col s12 m6 l4" ]
-                            [ h1 [] [ text "Welcome!" ]
-                            , p [] [ text "This is the home page." ]
-                            , p [] [ text "To read posts, ", a [ href <| Route.path Route.ListPosts ] [ text "go here" ] ]
-                            ]
-                        ]
-                    ]
+                , Page.Home.view
                 ]
             }
 
