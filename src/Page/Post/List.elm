@@ -1,43 +1,27 @@
-module ListPosts exposing (Model(..), Msg(..), init, path, update, view)
+module Page.Post.List exposing (Model(..), Msg(..), init, update, view)
 
-import Html exposing (Html, a, div, main_, p, text)
+import Html exposing (Html, div, main_, p, span, text)
 import Html.Attributes exposing (class, href)
 import Http
-import Json.Decode exposing (Decoder, field, int, list, map2, string)
-
-
-
--- ROUTING
-
-
-path : Maybe Int -> String
-path mid =
-    let
-        basePath =
-            "/posts"
-    in
-    case mid of
-        Just id ->
-            basePath ++ "/" ++ String.fromInt id
-
-        Nothing ->
-            basePath
+import Json.Decode exposing (Decoder, field, int, list, map3, string)
+import Route
 
 
 
 -- MODEL
 
 
-type alias PostRecap =
+type alias Post =
     { id : Int
     , title : String
+    , body : String
     }
 
 
 type Model
     = Loading
     | Failure
-    | Success (List PostRecap)
+    | Success (List Post)
 
 
 init : ( Model, Cmd Msg )
@@ -50,7 +34,7 @@ init =
 
 
 type Msg
-    = GotData (Result Http.Error (List PostRecap))
+    = GotData (Result Http.Error (List Post))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -69,11 +53,16 @@ update msg _ =
 -- VIEW
 
 
-postCard : PostRecap -> Html Msg
+postCard : Post -> Html Msg
 postCard post =
-    div [ class "post-card" ]
-        [ a [ href <| path <| Just post.id ]
-            [ text <| "ID " ++ String.fromInt post.id ++ ": " ++ post.title ]
+    div [ class "col s12 m6 l4", href <| Route.path <| Route.ShowPost post.id ]
+        [ div [ class "card small hoverable grey lighten-4" ]
+            [ div [ class "card-content" ]
+                [ span [ class "card-title medium" ]
+                    [ text <| "ID " ++ String.fromInt post.id ++ ": " ++ post.title ]
+                , p [] [ text post.body ]
+                ]
+            ]
         ]
 
 
@@ -99,18 +88,19 @@ view model =
 fetchData : Cmd Msg
 fetchData =
     Http.get
-        { url = "https://jsonplaceholder.typicode.com/posts?_limit=10"
+        { url = "https://jsonplaceholder.typicode.com/posts?_limit=9"
         , expect = Http.expectJson GotData dataDecoder
         }
 
 
-itemDecoder : Decoder PostRecap
+itemDecoder : Decoder Post
 itemDecoder =
-    map2 PostRecap
+    map3 Post
         (field "id" int)
         (field "title" string)
+        (field "body" string)
 
 
-dataDecoder : Decoder (List PostRecap)
+dataDecoder : Decoder (List Post)
 dataDecoder =
     list itemDecoder

@@ -1,4 +1,4 @@
-module Route exposing (..)
+module Route exposing (Route(..), fromUrl, path)
 
 import Url exposing (Url)
 import Url.Parser exposing ((</>), Parser, map, oneOf, parse, s, top)
@@ -11,7 +11,7 @@ import Url.Parser exposing ((</>), Parser, map, oneOf, parse, s, top)
 type Route
     = Home
     | ListPosts
-    | NotFound
+    | ShowPost Int
 
 
 matchRoute : Parser (Route -> a) a
@@ -22,14 +22,9 @@ matchRoute =
         ]
 
 
-fromUrl : Url -> Route
+fromUrl : Url -> Maybe Route
 fromUrl url =
-    case parse matchRoute url of
-        Just route ->
-            route
-
-        Nothing ->
-            NotFound
+    parse matchRoute url
 
 
 path : Route -> String
@@ -41,5 +36,5 @@ path route =
         ListPosts ->
             "/posts"
 
-        NotFound ->
-            "/"
+        ShowPost int ->
+            path ListPosts ++ String.fromInt int
