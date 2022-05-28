@@ -1,7 +1,7 @@
 module Route exposing (Route(..), fromUrl, path)
 
 import Url exposing (Url)
-import Url.Parser exposing ((</>), Parser, map, oneOf, parse, s, top)
+import Url.Parser exposing ((</>), Parser, int, map, oneOf, parse, s, top)
 
 
 
@@ -18,6 +18,7 @@ matchRoute : Parser (Route -> a) a
 matchRoute =
     oneOf
         [ map Home top
+        , map ShowPost (s "posts" </> int)
         , map ListPosts (s "posts")
         ]
 
@@ -37,4 +38,4 @@ path route =
             "/posts"
 
         ShowPost int ->
-            path ListPosts ++ String.fromInt int
+            "/posts/" ++ String.fromInt int

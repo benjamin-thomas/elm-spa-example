@@ -5,6 +5,7 @@ import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Page.Post.List
+import Page.Post.Show
 import Route exposing (Route)
 import Url exposing (Url)
 
@@ -32,6 +33,7 @@ main =
 type Page
     = Home
     | ListPosts Page.Post.List.Model
+    | ShowPost Page.Post.Show.Model
     | NotFound
 
 
@@ -56,7 +58,11 @@ changePage maybeRoute model =
             ( { model | page = ListPosts subModel }, Cmd.map ListPostsMsg subCmdMsg )
 
         Just (Route.ShowPost id) ->
-            Debug.todo "branch 'Just (ShowPost _)' not implemented"
+            let
+                ( subModel, subCmdMsg ) =
+                    Page.Post.Show.init id
+            in
+            ( { model | page = ShowPost subModel }, Cmd.map ShowPostMsg subCmdMsg )
 
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -78,6 +84,7 @@ type Msg
     = UrlChanged Url
     | LinkClicked Browser.UrlRequest
     | ListPostsMsg Page.Post.List.Msg
+    | ShowPostMsg Page.Post.Show.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -101,6 +108,13 @@ update msg model =
             in
             ( { model | page = ListPosts newModel }, Cmd.map ListPostsMsg newCmdMsg )
 
+        ( ShowPostMsg subMsg, ShowPost subModel ) ->
+            let
+                ( newModel, newCmdMsg ) =
+                    Page.Post.Show.update subMsg subModel
+            in
+            ( { model | page = ShowPost newModel }, Cmd.map ShowPostMsg newCmdMsg )
+
         ( _, _ ) ->
             ( { model | page = NotFound }, Cmd.none )
 
@@ -121,27 +135,41 @@ subscriptions _ =
 view : Model -> Browser.Document Msg
 view model =
     let
-        nav : Html msg
-        nav =
-            div []
-                [ ul []
-                    [ li [] [ a [ href <| Route.path Route.Home ] [ text "Home" ] ]
-                    , li [] [ a [ href <| Route.path Route.ListPosts ] [ text "Posts" ] ]
+        nav_ : Html msg
+        nav_ =
+            header []
+                [ nav []
+                    [ div [ class "nav-wrapper container" ]
+                        [ ul [ class "right" ]
+                            [ li [] [ a [ class "btn", href <| Route.path Route.Home ] [ text "Home" ] ]
+                            , li [] [ a [ class "btn", href <| Route.path Route.ListPosts ] [ text "Posts" ] ]
+                            ]
+                        ]
                     ]
                 ]
     in
     case model.page of
         Home ->
             { title = "Home"
-            , body = [ nav, p [] [ text "Your are at home!" ] ]
+            , body =
+                [ nav_
+                , h1 [] [ text "Welcome!" ]
+                , p [] [ text "This is the home page. Intentionally left empty." ]
+                ]
             }
 
         ListPosts listPostModel ->
-            { title = "Lits posts"
+            { title = "List posts"
             , body =
-                [ nav
+                [ nav_
                 , Page.Post.List.view listPostModel |> Html.map ListPostsMsg
                 ]
+            }
+
+        -- TODO: I should return the title from the Page.Post.Show
+        ShowPost subModel ->
+            { title = "Showing post"
+            , body = [ nav_, Page.Post.Show.view subModel |> Html.map ShowPostMsg ]
             }
 
         NotFound ->
