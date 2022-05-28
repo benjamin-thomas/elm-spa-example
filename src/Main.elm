@@ -150,10 +150,11 @@ view model =
             header []
                 [ nav []
                     [ div [ class "nav-wrapper container" ]
-                        [ ul [ class "right" ]
+                        [ ul [ class "left" ]
                             [ li [] [ a [ class "btn", href <| Route.path Route.Home ] [ text "Home" ] ]
-                            , li [] [ a [ class "btn", href <| Route.path Route.ListPosts ] [ text "Posts" ] ]
-                            , li [] [ a [ class "btn", href <| Route.path Route.Login ] [ text "Login" ] ]
+                            ]
+                        , ul [ class "right" ]
+                            [ li [] [ a [ class "btn", href <| Route.path Route.Login ] [ text "Login" ] ]
                             , li [] [ a [ class "btn", href <| Route.path Route.SignUp ] [ text "Sign up" ] ]
                             ]
                         ]
@@ -166,7 +167,8 @@ view model =
             , body =
                 [ nav_
                 , h1 [] [ text "Welcome!" ]
-                , p [] [ text "This is the home page. Intentionally left empty." ]
+                , p [] [ text "This is the home page." ]
+                , p [] [ text "To read posts, ", a [ href <| Route.path Route.ListPosts ] [ text "go here" ] ]
                 ]
             }
 
