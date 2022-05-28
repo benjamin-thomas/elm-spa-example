@@ -1,15 +1,19 @@
 module Page.Creds.Shared exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (class, placeholder, type_)
+import Html.Attributes exposing (class, href, placeholder, style, type_)
+import Route
 
 
 authentication : List (Html msg) -> Html msg
 authentication body =
     main_ [ class "container " ]
         [ div [ class "full-height row valign-wrapper" ]
-            [ Html.form [ class "col s12 m4 offset-m4" ]
-                body
+            [ div [ class "col s12 m4 offset-m4" ]
+                [ Html.form []
+                    body
+                , div [ style "text-align" "right", style "margin-top" "150px" ] [ text "Go back to: ", a [ href <| Route.path Route.Home ] [ text "HOME" ] ]
+                ]
             ]
         ]
 
