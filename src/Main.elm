@@ -42,8 +42,17 @@ type Page
     | NotFound
 
 
+type alias Email =
+    String
+
+
+type User
+    = Visitor
+    | User Email
+
+
 type alias Model =
-    { key : Nav.Key, page : Page }
+    { key : Nav.Key, page : Page, user : User }
 
 
 changePage : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -82,6 +91,7 @@ init _ url navKey =
         initModel =
             { page = NotFound
             , key = navKey
+            , user = Visitor
             }
     in
     changePage (Route.fromUrl url) initModel
@@ -96,6 +106,7 @@ type Msg
     | LinkClicked Browser.UrlRequest
     | ListPostsMsg Page.Post.List.Msg
     | ShowPostMsg Page.Post.Show.Msg
+    | LoginMsg Page.Creds.Login.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -111,6 +122,9 @@ update msg model =
 
         ( UrlChanged url, _ ) ->
             changePage (Route.fromUrl url) model
+
+        ( LoginMsg _, _ ) ->
+            ( { model | page = Home }, Cmd.none )
 
         ( ListPostsMsg subMsg, ListPosts subModel ) ->
             let
@@ -172,7 +186,7 @@ view model =
             }
 
         Login ->
-            { title = "Login", body = [ Page.Creds.Login.view ] }
+            { title = "Login", body = [ Page.Creds.Login.view Nothing |> Html.map LoginMsg ] }
 
         SignUp ->
             { title = "Sign up", body = [ Page.Creds.SignUp.view ] }

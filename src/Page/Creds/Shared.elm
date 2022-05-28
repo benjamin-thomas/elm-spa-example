@@ -12,7 +12,10 @@ authentication body =
             [ div [ class "col s12 m4 offset-m4" ]
                 [ Html.form []
                     body
-                , div [ style "text-align" "right", style "margin-top" "150px" ] [ text "Go back to: ", a [ href <| Route.path Route.Home ] [ text "HOME" ] ]
+                , div [ style "text-align" "right", style "margin-top" "150px" ]
+                    [ text "Go back to: "
+                    , a [ href <| Route.path Route.Home ] [ text "HOME" ]
+                    ]
                 ]
             ]
         ]
