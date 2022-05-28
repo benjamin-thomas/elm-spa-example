@@ -5,6 +5,7 @@ import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Page.Creds.Login
+import Page.Creds.SignUp
 import Page.Post.List
 import Page.Post.Show
 import Route exposing (Route)
@@ -34,6 +35,7 @@ main =
 type Page
     = Home
     | Login
+    | SignUp
     | ListPosts Page.Post.List.Model
     | ShowPost Page.Post.Show.Model
     | NotFound
@@ -54,6 +56,9 @@ changePage maybeRoute model =
 
         Just Route.Login ->
             ( { model | page = Login }, Cmd.none )
+
+        Just Route.SignUp ->
+            ( { model | page = SignUp }, Cmd.none )
 
         Just Route.ListPosts ->
             let
@@ -149,6 +154,7 @@ view model =
                             [ li [] [ a [ class "btn", href <| Route.path Route.Home ] [ text "Home" ] ]
                             , li [] [ a [ class "btn", href <| Route.path Route.ListPosts ] [ text "Posts" ] ]
                             , li [] [ a [ class "btn", href <| Route.path Route.Login ] [ text "Login" ] ]
+                            , li [] [ a [ class "btn", href <| Route.path Route.SignUp ] [ text "Sign up" ] ]
                             ]
                         ]
                     ]
@@ -166,6 +172,9 @@ view model =
 
         Login ->
             { title = "Login", body = [ Page.Creds.Login.view ] }
+
+        SignUp ->
+            { title = "Sign up", body = [ Page.Creds.SignUp.view ] }
 
         ListPosts listPostModel ->
             { title = "List posts"

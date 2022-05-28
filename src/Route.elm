@@ -11,6 +11,7 @@ import Url.Parser exposing ((</>), Parser, int, map, oneOf, parse, s, top)
 type Route
     = Home
     | Login
+    | SignUp
     | ListPosts
     | ShowPost Int
 
@@ -24,6 +25,9 @@ path route =
         Login ->
             "/login"
 
+        SignUp ->
+            "/signup"
+
         ListPosts ->
             "/posts"
 
@@ -36,6 +40,7 @@ matchRoute =
     oneOf
         [ map Home top
         , map Login (s "login")
+        , map SignUp (s "signup")
         , map ListPosts (s "posts")
         , map ShowPost (s "posts" </> int)
         ]

@@ -37,7 +37,7 @@ update msg _ =
                 Ok value ->
                     ( Success value, Cmd.none )
 
-                Err error ->
+                Err _ ->
                     ( Failure, Cmd.none )
 
 
