@@ -21,22 +21,22 @@ path : Route -> String
 path route =
     case route of
         Home ->
-            "/"
+            "#/"
 
         Login ->
-            "/login"
+            "#/login"
 
         SignUp ->
-            "/signup"
+            "#/signup"
 
         NewPost ->
-            "/posts/new"
+            "#/posts/new"
 
         ListPosts ->
-            "/posts"
+            "#/posts"
 
         ShowPost int ->
-            "/posts/" ++ String.fromInt int
+            "#/posts/" ++ String.fromInt int
 
 
 matchRoute : Parser (Route -> a) a

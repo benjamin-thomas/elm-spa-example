@@ -5351,6 +5351,67 @@ var $elm$core$Task$perform = F2(
 			A2($elm$core$Task$map, toMessage, task));
 	});
 var $elm$browser$Browser$application = _Browser_application;
+var $elm$core$Basics$composeL = F3(
+	function (g, f, x) {
+		return g(
+			f(x));
+	});
+var $mthadley$elm_hash_routing$Browser$Hash$Internal$fixPathQuery = function (url) {
+	var _v0 = function () {
+		var _v1 = A2($elm$core$String$split, '?', url.ab);
+		if (_v1.b && _v1.b.b) {
+			var path = _v1.a;
+			var _v2 = _v1.b;
+			var query = _v2.a;
+			return _Utils_Tuple2(
+				path,
+				$elm$core$Maybe$Just(query));
+		} else {
+			return _Utils_Tuple2(url.ab, url.ah);
+		}
+	}();
+	var newPath = _v0.a;
+	var newQuery = _v0.b;
+	return _Utils_update(
+		url,
+		{ab: newPath, ah: newQuery});
+};
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (!maybe.$) {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var $mthadley$elm_hash_routing$Browser$Hash$Internal$pathFromFragment = function (url) {
+	return _Utils_update(
+		url,
+		{
+			V: $elm$core$Maybe$Nothing,
+			ab: A2($elm$core$Maybe$withDefault, '', url.V)
+		});
+};
+var $mthadley$elm_hash_routing$Browser$Hash$Internal$updateUrl = A2($elm$core$Basics$composeL, $mthadley$elm_hash_routing$Browser$Hash$Internal$fixPathQuery, $mthadley$elm_hash_routing$Browser$Hash$Internal$pathFromFragment);
+var $mthadley$elm_hash_routing$Browser$Hash$application = function (config) {
+	return $elm$browser$Browser$application(
+		{
+			aF: F3(
+				function (flags, url, key) {
+					return A3(
+						config.aF,
+						flags,
+						$mthadley$elm_hash_routing$Browser$Hash$Internal$updateUrl(url),
+						key);
+				}),
+			aI: A2($elm$core$Basics$composeL, config.aI, $mthadley$elm_hash_routing$Browser$Hash$Internal$updateUrl),
+			aJ: config.aJ,
+			aQ: config.aQ,
+			aS: config.aS,
+			aU: config.aU
+		});
+};
 var $author$project$Main$Guest = {$: 0};
 var $author$project$Main$NotFound = {$: 6};
 var $author$project$Main$Home = {$: 0};
@@ -6963,18 +7024,18 @@ var $elm$html$Html$Events$onClick = function (msg) {
 var $author$project$Route$path = function (route) {
 	switch (route.$) {
 		case 0:
-			return '/';
+			return '#/';
 		case 1:
-			return '/login';
+			return '#/login';
 		case 2:
-			return '/signup';
+			return '#/signup';
 		case 3:
-			return '/posts/new';
+			return '#/posts/new';
 		case 4:
-			return '/posts';
+			return '#/posts';
 		default:
 			var _int = route.a;
-			return '/posts/' + $elm$core$String$fromInt(_int);
+			return '#/posts/' + $elm$core$String$fromInt(_int);
 	}
 };
 var $elm$virtual_dom$VirtualDom$text = _VirtualDom_text;
@@ -7922,7 +7983,7 @@ var $author$project$Main$view = function (model) {
 			};
 	}
 };
-var $author$project$Main$main = $elm$browser$Browser$application(
+var $author$project$Main$main = $mthadley$elm_hash_routing$Browser$Hash$application(
 	{aF: $author$project$Main$init, aI: $author$project$Main$UrlChanged, aJ: $author$project$Main$LinkClicked, aQ: $author$project$Main$subscriptions, aS: $author$project$Main$update, aU: $author$project$Main$view});
 _Platform_export({'Main':{'init':$author$project$Main$main(
 	$elm$json$Json$Decode$succeed(0))(0)}});}(this));

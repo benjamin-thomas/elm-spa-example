@@ -22,13 +22,16 @@ It was designed prior to Elm `0.19.1` so it mostly served as inspiration from ea
 
 Basic elm toolchain and `elm-live`.
 
+## Misc
+
+I use hash based routing (via `mthadley/elm-hash-routing`) so that I can deploy this app easily to github pages.
+
 
 ## Run dev server
 
-`--hot` restores the previous app state after reload, `--pushstate` serves all requests with start-page (required behavior for `Browser.application`).
 ```bash
 # Frontend
-elm-live ./src/Main.elm --start-page=index2.html --hot --pushstate -- --debug --output=dist/main.js
+elm-live ./src/Main.elm --start-page=index2.html --hot -- --debug --output=dist/main.js
 ```
 
 ## Backend

@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Browser
+import Browser.Hash
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -20,7 +21,7 @@ import Url exposing (Url)
 
 main : Program () Model Msg
 main =
-    Browser.application
+    Browser.Hash.application
         { init = init
         , view = view
         , update = update
