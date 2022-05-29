@@ -1,4 +1,4 @@
-# Blog tutorial
+# Elm SPA example
 
 Original tutorial found at: https://medium.com/@grrinchas/building-a-single-page-application-in-elm-planning-and-scaffolding-part-2-279b4924c578
 
@@ -6,11 +6,17 @@ It was designed prior to Elm `0.19.1` so it mostly served as inspiration from ea
 
 ## Objectives
 
-- demonstrate routing (as a SPA)
+- demonstrate SPA routing techniques
 - use type safe routing
 - validate user data (forms)
-- reload form state from the URL
+- GET and POST data via a JSON API
 - explore how to organize code
+
+## TODO
+
+- reload form state from the URL (TODO)
+- remove CSS framework and implement custom styles
+
 
 ## Requirements
 
