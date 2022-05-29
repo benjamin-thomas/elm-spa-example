@@ -124,7 +124,14 @@ update msg model =
         PostData result ->
             case result of
                 Ok _ ->
-                    ( { model | notification = Just "HTTP POST success!\nDo note that the resource is not really updated on the server (but the HTTP call is real)." }, Cmd.none )
+                    ( { model
+                        | notification =
+                            Just "HTTP POST success!\nDo note that the resource is not really updated on the server (but the HTTP call is real)."
+                        , title = ""
+                        , body = ""
+                      }
+                    , Cmd.none
+                    )
 
                 Err _ ->
                     ( { model | notification = Just "HTTP POST error something went wrong!" }, Cmd.none )
