@@ -4,9 +4,9 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (onClick)
 import Page.Creds.Login
 import Page.Creds.SignUp
-import Page.Home
 import Page.Post.List
 import Page.Post.New
 import Page.Post.Show
@@ -49,7 +49,7 @@ type alias Email =
 
 
 type User
-    = Visitor
+    = Guest
     | User Email
 
 
@@ -100,7 +100,7 @@ init _ url navKey =
         initModel =
             { page = NotFound
             , key = navKey
-            , user = Visitor
+            , user = Guest
             }
     in
     changePage (Route.fromUrl url) initModel
@@ -117,6 +117,8 @@ type Msg
     | ListPostsMsg Page.Post.List.Msg
     | ShowPostMsg Page.Post.Show.Msg
     | LoginMsg Page.Creds.Login.Msg
+    | SimulateLogin
+    | Logout
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -157,6 +159,12 @@ update msg model =
             in
             ( { model | page = ShowPost newModel }, Cmd.map ShowPostMsg newCmdMsg )
 
+        ( SimulateLogin, _ ) ->
+            ( { model | user = User "user@example.com" }, Cmd.none )
+
+        ( Logout, _ ) ->
+            ( { model | page = Home, user = Guest }, Cmd.none )
+
         ( _, _ ) ->
             ( { model | page = NotFound }, Cmd.none )
 
@@ -174,23 +182,51 @@ subscriptions _ =
 -- VIEW
 
 
+viewHome : Html Msg
+viewHome =
+    main_ [ class "container" ]
+        [ div [ class "row" ]
+            [ div [ class "col s12 m6 l4" ]
+                [ h1 [] [ text "Welcome!" ]
+                , p [] [ text "This is the home page." ]
+                , p [] [ text "To read posts, ", a [ href <| Route.path Route.ListPosts ] [ text "go here" ] ]
+                , div []
+                    [ button [ class "btn", style "margin-top" "30px", onClick SimulateLogin ] [ text "Fake login" ]
+                    ]
+                ]
+            ]
+        ]
+
+
+navBarItems : User -> List (Html Msg)
+navBarItems user =
+    case user of
+        Guest ->
+            [ ul [ class "right" ]
+                [ li [] [ a [ class "btn", href <| Route.path Route.Login ] [ text "Login" ] ]
+                , li [] [ a [ class "btn", href <| Route.path Route.SignUp ] [ text "Sign up" ] ]
+                ]
+            ]
+
+        User email ->
+            [ ul []
+                [ li [] [ a [ class "btn", href <| Route.path Route.NewPost ] [ text "New post" ] ]
+                , li [] [ text email ]
+                ]
+            , ul [ class "right" ]
+                [ li [] [ button [ class "btn", onClick Logout ] [ text "Logout" ] ]
+                ]
+            ]
+
+
 view : Model -> Browser.Document Msg
 view model =
     let
-        navBar : Html msg
+        navBar : Html Msg
         navBar =
             header []
                 [ nav []
-                    [ div [ class "nav-wrapper container" ]
-                        [ ul [ class "left" ]
-                            [ li [] [ a [ class "btn", href <| Route.path Route.Home ] [ text "Home" ] ]
-                            ]
-                        , ul [ class "right" ]
-                            [ li [] [ a [ class "btn", href <| Route.path Route.NewPost ] [ text "Create post" ] ]
-                            , li [] [ a [ class "btn", href <| Route.path Route.Login ] [ text "Login" ] ]
-                            , li [] [ a [ class "btn", href <| Route.path Route.SignUp ] [ text "Sign up" ] ]
-                            ]
-                        ]
+                    [ div [ class "nav-wrapper container" ] (navBarItems model.user)
                     ]
                 ]
     in
@@ -199,7 +235,7 @@ view model =
             { title = "Home"
             , body =
                 [ navBar
-                , Page.Home.view
+                , viewHome
                 ]
             }
 
