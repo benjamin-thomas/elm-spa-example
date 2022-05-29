@@ -33,13 +33,11 @@ elm-live ./src/Main.elm --start-page=index2.html --hot --pushstate -- --debug --
 
 ## Backend
 
-See:
+Live backend is freely accessible at: https://jsonplaceholder.typicode.com/posts?_limit=2&_page=2
+
+Note that the PUT, POST, PATCH and DELETE methods only simulate modifying the underlying resource.
+
+See also:
 
 - https://jsonplaceholder.typicode.com/guide/
 - https://github.com/typicode/json-server#paginate
-
-
-Example usage:
-```
-http https://jsonplaceholder.typicode.com/posts _limit==2 _page==2
-```
