@@ -8,6 +8,7 @@ import Page.Creds.Login
 import Page.Creds.SignUp
 import Page.Home
 import Page.Post.List
+import Page.Post.New
 import Page.Post.Show
 import Route exposing (Route)
 import Url exposing (Url)
@@ -37,6 +38,7 @@ type Page
     = Home
     | Login
     | SignUp
+    | NewPost Page.Post.New.Model
     | ListPosts Page.Post.List.Model
     | ShowPost Page.Post.Show.Model
     | NotFound
@@ -69,6 +71,13 @@ changePage maybeRoute model =
 
         Just Route.SignUp ->
             ( { model | page = SignUp }, Cmd.none )
+
+        Just Route.NewPost ->
+            let
+                ( subModel, subCmdMsg ) =
+                    Page.Post.New.init
+            in
+            ( { model | page = NewPost subModel }, Cmd.map NewPostMsg subCmdMsg )
 
         Just Route.ListPosts ->
             let
@@ -104,6 +113,7 @@ init _ url navKey =
 type Msg
     = UrlChanged Url
     | LinkClicked Browser.UrlRequest
+    | NewPostMsg Page.Post.New.Msg
     | ListPostsMsg Page.Post.List.Msg
     | ShowPostMsg Page.Post.Show.Msg
     | LoginMsg Page.Creds.Login.Msg
@@ -125,6 +135,13 @@ update msg model =
 
         ( LoginMsg _, _ ) ->
             ( { model | page = Home }, Cmd.none )
+
+        ( NewPostMsg subMsg, NewPost subModel ) ->
+            let
+                ( newModel, newCmdMsg ) =
+                    Page.Post.New.update subMsg subModel
+            in
+            ( { model | page = NewPost newModel }, Cmd.map NewPostMsg newCmdMsg )
 
         ( ListPostsMsg subMsg, ListPosts subModel ) ->
             let
@@ -160,8 +177,8 @@ subscriptions _ =
 view : Model -> Browser.Document Msg
 view model =
     let
-        nav_ : Html msg
-        nav_ =
+        navBar : Html msg
+        navBar =
             header []
                 [ nav []
                     [ div [ class "nav-wrapper container" ]
@@ -169,7 +186,8 @@ view model =
                             [ li [] [ a [ class "btn", href <| Route.path Route.Home ] [ text "Home" ] ]
                             ]
                         , ul [ class "right" ]
-                            [ li [] [ a [ class "btn", href <| Route.path Route.Login ] [ text "Login" ] ]
+                            [ li [] [ a [ class "btn", href <| Route.path Route.NewPost ] [ text "Create post" ] ]
+                            , li [] [ a [ class "btn", href <| Route.path Route.Login ] [ text "Login" ] ]
                             , li [] [ a [ class "btn", href <| Route.path Route.SignUp ] [ text "Sign up" ] ]
                             ]
                         ]
@@ -180,7 +198,7 @@ view model =
         Home ->
             { title = "Home"
             , body =
-                [ nav_
+                [ navBar
                 , Page.Home.view
                 ]
             }
@@ -191,10 +209,17 @@ view model =
         SignUp ->
             { title = "Sign up", body = [ Page.Creds.SignUp.view ] }
 
+        NewPost subModel ->
+            { title = "New post"
+            , body =
+                [ Page.Post.New.view subModel |> Html.map NewPostMsg
+                ]
+            }
+
         ListPosts listPostModel ->
             { title = "List posts"
             , body =
-                [ nav_
+                [ navBar
                 , Page.Post.List.view listPostModel |> Html.map ListPostsMsg
                 ]
             }
@@ -202,7 +227,7 @@ view model =
         -- TODO: I should return the title from the Page.Post.Show
         ShowPost subModel ->
             { title = "Showing post"
-            , body = [ nav_, Page.Post.Show.view subModel |> Html.map ShowPostMsg ]
+            , body = [ navBar, Page.Post.Show.view subModel |> Html.map ShowPostMsg ]
             }
 
         NotFound ->

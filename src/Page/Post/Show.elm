@@ -49,7 +49,7 @@ viewPost : Post -> Html msg
 viewPost post =
     main_ [ class "container" ]
         [ div [ class "row" ]
-            [ div [ class "col l6 offset-l3" ]
+            [ div [ class "col l12" ]
                 [ h1 [] [ text <| "ID " ++ String.fromInt post.id ++ ": " ++ post.title ]
                 , List.repeat 10 post.body |> List.map (\par -> p [] [ text par ]) |> div []
                 ]

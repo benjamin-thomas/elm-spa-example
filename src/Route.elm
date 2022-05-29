@@ -12,6 +12,7 @@ type Route
     = Home
     | Login
     | SignUp
+    | NewPost
     | ListPosts
     | ShowPost Int
 
@@ -28,6 +29,9 @@ path route =
         SignUp ->
             "/signup"
 
+        NewPost ->
+            "/posts/new"
+
         ListPosts ->
             "/posts"
 
@@ -39,10 +43,15 @@ matchRoute : Parser (Route -> a) a
 matchRoute =
     oneOf
         [ map Home top
+
+        -- AUTHENTICATION
         , map Login (s "login")
         , map SignUp (s "signup")
+
+        -- POSTS
         , map ListPosts (s "posts")
         , map ShowPost (s "posts" </> int)
+        , map NewPost (s "posts" </> s "new")
         ]
 
 

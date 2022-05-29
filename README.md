@@ -7,6 +7,9 @@ It was designed prior to Elm `0.19.1` so it mostly served as inspiration from ea
 ## Objectives
 
 - demonstrate routing (as a SPA)
+- use type safe routing
+- validate user data (forms)
+- reload form state from the URL
 - explore how to organize code
 
 ## Requirements
