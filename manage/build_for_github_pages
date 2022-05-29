@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+cp ./index2.html ./gh/index.html
+
+sed -i 's:/dist/main.js:/gh/main.js:' ./gh/index.html
+
+elm make ./src/Main.elm --optimize --output=./gh/main.js
+
+du -sh ./gh/*

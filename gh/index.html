@@ -1,0 +1,59 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Main</title>
+
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+  <style>
+    .full-height {
+      height: 100%;
+    }
+
+    body,
+    html,
+    #app,
+    main {
+      height: 100%;
+    }
+
+    #app {
+      min-width: 620px;
+    }
+
+    .card {
+      cursor: pointer;
+    }
+
+    a.card-content {
+      display: block;
+      color: inherit;
+    }
+
+    textarea {
+      height: 500px;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <pre id="elm"></pre>
+
+  <script src="/gh/main.js"></script>
+  <script>
+    Elm.Main.init({
+      node: document.getElementById("elm")
+    });
+  </script>
+
+
+</body>
+
+</html>
