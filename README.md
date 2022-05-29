@@ -4,6 +4,10 @@ Original tutorial found at: https://medium.com/@grrinchas/building-a-single-page
 
 It was designed prior to Elm `0.19.1` so it mostly served as inspiration from early implementations.
 
+## Deployment
+
+The live app is available at: https://benjamin-thomas.github.io/elm-spa-example/gh/
+
 ## Objectives
 
 - demonstrate SPA routing techniques
