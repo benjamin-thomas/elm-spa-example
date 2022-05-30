@@ -13,15 +13,17 @@ getEmail user =
             Nothing
 
         User email ->
-            Just email
+            case email of
+                Email str ->
+                    Just str
 
 
 
 -- MODEL
 
 
-type alias Email =
-    String
+type Email
+    = Email String
 
 
 type User
@@ -40,17 +42,7 @@ asGuest =
 
 init : ( Model, Cmd msg )
 init =
-    ( User "user@example.com", Cmd.none )
-
-
-toStr : Model -> Maybe String
-toStr model =
-    case model of
-        Guest ->
-            Nothing
-
-        User email ->
-            Just email
+    ( User (Email "user@example.com"), Cmd.none )
 
 
 
@@ -69,7 +61,7 @@ update msg model =
             ( model, Cmd.none )
 
         ChangeEmail email ->
-            ( User email, Cmd.none )
+            ( User (Email email), Cmd.none )
 
 
 
@@ -91,7 +83,7 @@ emailInput maybeEmail evt =
 view : Model -> Html Msg
 view model =
     authentication
-        [ emailInput (toStr model) ChangeEmail
+        [ emailInput (getEmail model) ChangeEmail
         , passwordInput
         , input [ class "btn right", type_ "button", value "Login", onClick Authenticate ] []
         ]
