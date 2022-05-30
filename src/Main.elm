@@ -39,12 +39,12 @@ main =
 
 type Page
     = Home
-    | Login Page.Creds.Login.Model
-    | SignUp
+    | LoginPage Page.Creds.Login.Model
+    | SignUpPage Page.Creds.SignUp.Model
     | NewPostPage Page.Post.New.Model
-    | ListPosts Page.Post.List.Model
-    | ShowPost Page.Post.Show.Model
-    | NotFound
+    | ListPostsPage Page.Post.List.Model
+    | ShowPostPage Page.Post.Show.Model
+    | NotFoundPage
 
 
 type alias Model =
@@ -55,7 +55,7 @@ changePage : Maybe Route -> Model -> ( Model, Cmd Msg )
 changePage maybeRoute model =
     case maybeRoute of
         Nothing ->
-            ( { model | page = NotFound }, Cmd.none )
+            ( { model | page = NotFoundPage }, Cmd.none )
 
         Just Route.Home ->
             ( { model | page = Home }, Cmd.none )
@@ -65,10 +65,14 @@ changePage maybeRoute model =
                 ( subModel, subCmdMsg ) =
                     Page.Creds.Login.init
             in
-            ( { model | page = Login subModel }, Cmd.map LoginMsg subCmdMsg )
+            ( { model | page = LoginPage subModel }, Cmd.map LoginMsg subCmdMsg )
 
         Just Route.SignUp ->
-            ( { model | page = SignUp }, Cmd.none )
+            let
+                ( subModel, subCmdMsg ) =
+                    Page.Creds.SignUp.init
+            in
+            ( { model | page = SignUpPage subModel }, Cmd.none )
 
         Just Route.NewPost ->
             let
@@ -82,21 +86,21 @@ changePage maybeRoute model =
                 ( subModel, subCmdMsg ) =
                     Page.Post.List.init
             in
-            ( { model | page = ListPosts subModel }, Cmd.map ListPostsMsg subCmdMsg )
+            ( { model | page = ListPostsPage subModel }, Cmd.map ListPostsMsg subCmdMsg )
 
         Just (Route.ShowPost id) ->
             let
                 ( subModel, subCmdMsg ) =
                     Page.Post.Show.init id
             in
-            ( { model | page = ShowPost subModel }, Cmd.map ShowPostMsg subCmdMsg )
+            ( { model | page = ShowPostPage subModel }, Cmd.map ShowPostMsg subCmdMsg )
 
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url navKey =
     let
         initModel =
-            { page = NotFound
+            { page = NotFoundPage
             , key = navKey
             , user = Page.Creds.Shared.asGuest
             }
@@ -121,6 +125,19 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    let
+        newPage :
+            (model -> Page)
+            -> ( msg -> model -> ( model, Cmd msg ), msg, model )
+            -> (msg -> Msg)
+            -> ( Model, Cmd Msg )
+        newPage nextPage ( subUpdate, subMsg, subModel ) currMsg =
+            let
+                ( newModel, newCmdMsg ) =
+                    subUpdate subMsg subModel
+            in
+            ( { model | page = nextPage newModel }, Cmd.map currMsg newCmdMsg )
+    in
     case ( msg, model.page ) of
         ( LinkClicked urlRequest, _ ) ->
             case urlRequest of
@@ -134,27 +151,15 @@ update msg model =
             changePage (Route.fromUrl url) model
 
         ( NewPostMsg subMsg, NewPostPage subModel ) ->
-            let
-                ( newModel, newCmdMsg ) =
-                    Page.Post.New.update subMsg subModel
-            in
-            ( { model | page = NewPostPage newModel }, Cmd.map NewPostMsg newCmdMsg )
+            newPage NewPostPage ( Page.Post.New.update, subMsg, subModel ) NewPostMsg
 
-        ( ListPostsMsg subMsg, ListPosts subModel ) ->
-            let
-                ( newModel, newCmdMsg ) =
-                    Page.Post.List.update subMsg subModel
-            in
-            ( { model | page = ListPosts newModel }, Cmd.map ListPostsMsg newCmdMsg )
+        ( ListPostsMsg subMsg, ListPostsPage subModel ) ->
+            newPage ListPostsPage ( Page.Post.List.update, subMsg, subModel ) ListPostsMsg
 
-        ( ShowPostMsg subMsg, ShowPost subModel ) ->
-            let
-                ( newModel, newCmdMsg ) =
-                    Page.Post.Show.update subMsg subModel
-            in
-            ( { model | page = ShowPost newModel }, Cmd.map ShowPostMsg newCmdMsg )
+        ( ShowPostMsg subMsg, ShowPostPage subModel ) ->
+            newPage ShowPostPage ( Page.Post.Show.update, subMsg, subModel ) ShowPostMsg
 
-        ( LoginMsg subMsg, Login subModel ) ->
+        ( LoginMsg subMsg, LoginPage subModel ) ->
             let
                 ( newModel, newCmdMsg ) =
                     Page.Creds.Login.update subMsg subModel
@@ -165,10 +170,11 @@ update msg model =
             ( { model | page = Home, user = Page.Creds.Shared.asGuest }, Cmd.none )
 
         ( _, _ ) ->
-            ( { model | page = NotFound }, Cmd.none )
+            ( { model | page = NotFoundPage }, Cmd.none )
 
 
 
+-- newPage : Page.Post.Show.Msg -> Page.Post.Show.Model -> unknown -> ( Model, Cmd Msg )
 -- SUBSCRIPTIONS
 
 
@@ -222,10 +228,10 @@ view model =
                 ]
             }
 
-        Login subModel ->
+        LoginPage subModel ->
             { title = "Login", body = [ Page.Creds.Login.view subModel |> Html.map LoginMsg ] }
 
-        SignUp ->
+        SignUpPage subModel ->
             { title = "Sign up", body = [ Page.Creds.SignUp.view ] }
 
         NewPostPage subModel ->
@@ -235,7 +241,7 @@ view model =
                 ]
             }
 
-        ListPosts listPostModel ->
+        ListPostsPage listPostModel ->
             { title = "List posts"
             , body =
                 [ navBar
@@ -244,12 +250,12 @@ view model =
             }
 
         -- TODO: I should return the title from the Page.Post.Show
-        ShowPost subModel ->
+        ShowPostPage subModel ->
             { title = "Showing post"
             , body = [ navBar, Page.Post.Show.view subModel |> Html.map ShowPostMsg ]
             }
 
-        NotFound ->
+        NotFoundPage ->
             { title = "Oops"
             , body =
                 [ p [] [ text "Sorry, I could not find this page!" ]

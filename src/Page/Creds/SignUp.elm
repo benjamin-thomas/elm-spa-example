@@ -1,8 +1,17 @@
-module Page.Creds.SignUp exposing (view)
+module Page.Creds.SignUp exposing (Model, init, view)
 
 import Html exposing (Html, a, text)
 import Html.Attributes exposing (class)
-import Page.Creds.Shared exposing (authentication, emailInput, passwordAgain, passwordInput)
+import Page.Creds.Shared exposing (Email(..), User(..), authentication, emailInput, passwordAgain, passwordInput)
+
+
+type alias Model =
+    User
+
+
+init : ( Model, Cmd msg )
+init =
+    ( User (Email "user@example.com"), Cmd.none )
 
 
 type Msg
