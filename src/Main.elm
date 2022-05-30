@@ -40,7 +40,7 @@ type Page
     = Home
     | Login Page.Creds.Login.Model
     | SignUp
-    | NewPost Page.Post.New.Model
+    | NewPostPage Page.Post.New.Model
     | ListPosts Page.Post.List.Model
     | ShowPost Page.Post.Show.Model
     | NotFound
@@ -74,7 +74,7 @@ changePage maybeRoute model =
                 ( subModel, subCmdMsg ) =
                     Page.Post.New.init
             in
-            ( { model | page = NewPost subModel }, Cmd.map NewPostMsg subCmdMsg )
+            ( { model | page = NewPostPage subModel }, Cmd.map NewPostMsg subCmdMsg )
 
         Just Route.ListPosts ->
             let
@@ -132,12 +132,12 @@ update msg model =
         ( UrlChanged url, _ ) ->
             changePage (Route.fromUrl url) model
 
-        ( NewPostMsg subMsg, NewPost subModel ) ->
+        ( NewPostMsg subMsg, NewPostPage subModel ) ->
             let
                 ( newModel, newCmdMsg ) =
                     Page.Post.New.update subMsg subModel
             in
-            ( { model | page = NewPost newModel }, Cmd.map NewPostMsg newCmdMsg )
+            ( { model | page = NewPostPage newModel }, Cmd.map NewPostMsg newCmdMsg )
 
         ( ListPostsMsg subMsg, ListPosts subModel ) ->
             let
@@ -227,7 +227,7 @@ view model =
         SignUp ->
             { title = "Sign up", body = [ Page.Creds.SignUp.view ] }
 
-        NewPost subModel ->
+        NewPostPage subModel ->
             { title = "New post"
             , body =
                 [ Page.Post.New.view subModel |> Html.map NewPostMsg

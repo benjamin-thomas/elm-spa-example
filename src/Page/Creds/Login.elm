@@ -12,10 +12,8 @@ getEmail user =
         Guest ->
             Nothing
 
-        User email ->
-            case email of
-                Email str ->
-                    Just str
+        User (Email email) ->
+            Just email
 
 
 
