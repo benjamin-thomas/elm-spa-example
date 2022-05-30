@@ -6,7 +6,8 @@ import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Page.Creds.Login exposing (User(..))
+import Page.Creds.Login
+import Page.Creds.Shared exposing (User(..))
 import Page.Creds.SignUp
 import Page.Home
 import Page.Post.List
@@ -47,7 +48,7 @@ type Page
 
 
 type alias Model =
-    { key : Nav.Key, page : Page, user : Page.Creds.Login.User }
+    { key : Nav.Key, page : Page, user : Page.Creds.Shared.User }
 
 
 changePage : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -97,7 +98,7 @@ init _ url navKey =
         initModel =
             { page = NotFound
             , key = navKey
-            , user = Page.Creds.Login.asGuest
+            , user = Page.Creds.Shared.asGuest
             }
     in
     changePage (Route.fromUrl url) initModel
@@ -161,7 +162,7 @@ update msg model =
             ( { model | user = newModel, page = Home }, Cmd.map LoginMsg newCmdMsg )
 
         ( Logout, _ ) ->
-            ( { model | page = Home, user = Page.Creds.Login.asGuest }, Cmd.none )
+            ( { model | page = Home, user = Page.Creds.Shared.asGuest }, Cmd.none )
 
         ( _, _ ) ->
             ( { model | page = NotFound }, Cmd.none )
@@ -180,9 +181,9 @@ subscriptions _ =
 -- VIEW
 
 
-navBarItems : Page.Creds.Login.User -> List (Html Msg)
+navBarItems : Page.Creds.Shared.User -> List (Html Msg)
 navBarItems user =
-    case Page.Creds.Login.getEmail user of
+    case Page.Creds.Shared.getEmail user of
         Nothing ->
             [ ul [ class "right" ]
                 [ li [] [ a [ class "btn", href <| Route.path Route.Login ] [ text "Login" ] ]

@@ -2,12 +2,21 @@ module Page.Creds.Shared exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (class, href, placeholder, style, type_, value)
-import Html.Events exposing (onInput)
 import Route
 
 
-type alias Email =
-    String
+getEmail : User -> Maybe String
+getEmail user =
+    case user of
+        Guest ->
+            Nothing
+
+        User (Email email) ->
+            Just email
+
+
+type Email
+    = Email String
 
 
 type User
@@ -15,13 +24,9 @@ type User
     | User Email
 
 
-type alias Model =
-    User
-
-
-init : ( Model, Cmd msg )
-init =
-    ( Guest, Cmd.none )
+asGuest : User
+asGuest =
+    Guest
 
 
 authentication : List (Html msg) -> Html msg

@@ -1,41 +1,17 @@
-module Page.Creds.Login exposing (Model, Msg, User, asGuest, getEmail, init, update, view)
+module Page.Creds.Login exposing (Model, Msg, init, update, view)
 
 import Html exposing (..)
 import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
-import Page.Creds.Shared exposing (authentication, passwordInput)
-
-
-getEmail : User -> Maybe String
-getEmail user =
-    case user of
-        Guest ->
-            Nothing
-
-        User (Email email) ->
-            Just email
+import Page.Creds.Shared exposing (Email(..), User(..), authentication, getEmail, passwordInput)
 
 
 
 -- MODEL
 
 
-type Email
-    = Email String
-
-
-type User
-    = Guest
-    | User Email
-
-
 type alias Model =
     User
-
-
-asGuest : User
-asGuest =
-    Guest
 
 
 init : ( Model, Cmd msg )
