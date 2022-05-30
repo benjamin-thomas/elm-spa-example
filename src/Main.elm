@@ -6,8 +6,9 @@ import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import Page.Creds.Login
+import Page.Creds.Login exposing (User(..))
 import Page.Creds.SignUp
+import Page.Home
 import Page.Post.List
 import Page.Post.New
 import Page.Post.Show
@@ -37,7 +38,7 @@ main =
 
 type Page
     = Home
-    | Login
+    | Login Page.Creds.Login.Model
     | SignUp
     | NewPost Page.Post.New.Model
     | ListPosts Page.Post.List.Model
@@ -45,17 +46,8 @@ type Page
     | NotFound
 
 
-type alias Email =
-    String
-
-
-type User
-    = Guest
-    | User Email
-
-
 type alias Model =
-    { key : Nav.Key, page : Page, user : User }
+    { key : Nav.Key, page : Page, user : Page.Creds.Login.User }
 
 
 changePage : Maybe Route -> Model -> ( Model, Cmd Msg )
@@ -68,7 +60,11 @@ changePage maybeRoute model =
             ( { model | page = Home }, Cmd.none )
 
         Just Route.Login ->
-            ( { model | page = Login }, Cmd.none )
+            let
+                ( subModel, subCmdMsg ) =
+                    Page.Creds.Login.init
+            in
+            ( { model | page = Login subModel }, Cmd.map LoginMsg subCmdMsg )
 
         Just Route.SignUp ->
             ( { model | page = SignUp }, Cmd.none )
@@ -101,7 +97,7 @@ init _ url navKey =
         initModel =
             { page = NotFound
             , key = navKey
-            , user = Guest
+            , user = Page.Creds.Login.asGuest
             }
     in
     changePage (Route.fromUrl url) initModel
@@ -136,9 +132,6 @@ update msg model =
         ( UrlChanged url, _ ) ->
             changePage (Route.fromUrl url) model
 
-        ( LoginMsg _, _ ) ->
-            ( { model | page = Home }, Cmd.none )
-
         ( NewPostMsg subMsg, NewPost subModel ) ->
             let
                 ( newModel, newCmdMsg ) =
@@ -160,11 +153,15 @@ update msg model =
             in
             ( { model | page = ShowPost newModel }, Cmd.map ShowPostMsg newCmdMsg )
 
-        ( SimulateLogin, _ ) ->
-            ( { model | user = User "user@example.com" }, Cmd.none )
+        ( LoginMsg subMsg, Login subModel ) ->
+            let
+                ( newModel, newCmdMsg ) =
+                    Page.Creds.Login.update subMsg subModel
+            in
+            ( { model | user = newModel, page = Home }, Cmd.map LoginMsg newCmdMsg )
 
         ( Logout, _ ) ->
-            ( { model | page = Home, user = Guest }, Cmd.none )
+            ( { model | page = Home, user = Page.Creds.Login.asGuest }, Cmd.none )
 
         ( _, _ ) ->
             ( { model | page = NotFound }, Cmd.none )
@@ -183,33 +180,17 @@ subscriptions _ =
 -- VIEW
 
 
-viewHome : Html Msg
-viewHome =
-    main_ [ class "container" ]
-        [ div [ class "row" ]
-            [ div [ class "col s12 m6 l4" ]
-                [ h1 [] [ text "Welcome!" ]
-                , p [] [ text "This is the home page." ]
-                , p [] [ text "To read posts, ", a [ href <| Route.path Route.ListPosts ] [ text "go here" ] ]
-                , div []
-                    [ button [ class "btn", style "margin-top" "30px", onClick SimulateLogin ] [ text "Fake login" ]
-                    ]
-                ]
-            ]
-        ]
-
-
-navBarItems : User -> List (Html Msg)
+navBarItems : Page.Creds.Login.User -> List (Html Msg)
 navBarItems user =
-    case user of
-        Guest ->
+    case Page.Creds.Login.getEmail user of
+        Nothing ->
             [ ul [ class "right" ]
                 [ li [] [ a [ class "btn", href <| Route.path Route.Login ] [ text "Login" ] ]
                 , li [] [ a [ class "btn", href <| Route.path Route.SignUp ] [ text "Sign up" ] ]
                 ]
             ]
 
-        User email ->
+        Just email ->
             [ ul []
                 [ li [] [ a [ class "btn", href <| Route.path Route.NewPost ] [ text "New post" ] ]
                 , li [] [ text email ]
@@ -236,12 +217,12 @@ view model =
             { title = "Home"
             , body =
                 [ navBar
-                , viewHome
+                , Page.Home.view
                 ]
             }
 
-        Login ->
-            { title = "Login", body = [ Page.Creds.Login.view Nothing |> Html.map LoginMsg ] }
+        Login subModel ->
+            { title = "Login", body = [ Page.Creds.Login.view subModel |> Html.map LoginMsg ] }
 
         SignUp ->
             { title = "Sign up", body = [ Page.Creds.SignUp.view ] }

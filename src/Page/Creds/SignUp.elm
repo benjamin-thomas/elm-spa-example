@@ -5,10 +5,14 @@ import Html.Attributes exposing (class)
 import Page.Creds.Shared exposing (authentication, emailInput, passwordAgain, passwordInput)
 
 
+type Msg
+    = NoOp
+
+
 view : Html msg
 view =
     authentication
-        [ emailInput
+        [ emailInput Nothing
         , passwordInput
         , passwordAgain
         , a [ class "btn right" ] [ text "Sign Up" ]
