@@ -174,7 +174,6 @@ update msg model =
 
 
 
--- newPage : Page.Post.Show.Msg -> Page.Post.Show.Model -> unknown -> ( Model, Cmd Msg )
 -- SUBSCRIPTIONS
 
 
