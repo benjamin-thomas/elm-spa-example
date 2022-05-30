@@ -1,8 +1,9 @@
-module Page.Creds.SignUp exposing (Model, init, view)
+module Page.Creds.SignUp exposing (Model, Msg(..), init, update, view)
 
-import Html exposing (Html, a, text)
-import Html.Attributes exposing (class)
-import Page.Creds.Shared exposing (Email(..), User(..), authentication, emailInput, passwordAgain, passwordInput)
+import Html exposing (Html, a, div, i, input, text)
+import Html.Attributes exposing (class, placeholder, type_, value)
+import Html.Events exposing (onClick, onInput)
+import Page.Creds.Shared exposing (Email(..), User(..), authentication, emailInput, getEmail, passwordAgain, passwordInput)
 
 
 type alias Model =
@@ -14,15 +15,46 @@ init =
     ( User (Email "user@example.com"), Cmd.none )
 
 
+
+-- UPDATE
+
+
 type Msg
-    = NoOp
+    = ChangeEmail String
+    | Authenticate
 
 
-view : Html msg
-view =
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        Authenticate ->
+            ( model, Cmd.none )
+
+        ChangeEmail email ->
+            ( User (Email email), Cmd.none )
+
+
+
+-- VIEW
+
+
+emailInput : Maybe String -> (String -> Msg) -> Html Msg
+emailInput maybeEmail evt =
+    let
+        email =
+            Maybe.withDefault "" maybeEmail
+    in
+    div [ class "input-field" ]
+        [ i [ class "material-icons prefix" ] [ text "email" ]
+        , input [ placeholder "Email", type_ "text", value email, onInput evt ] []
+        ]
+
+
+view : Model -> Html Msg
+view model =
     authentication
-        [ emailInput Nothing
+        [ emailInput (getEmail model) ChangeEmail
         , passwordInput
         , passwordAgain
-        , a [ class "btn right" ] [ text "Sign Up" ]
+        , input [ class "btn right", type_ "button", value "Login", onClick Authenticate ] []
         ]

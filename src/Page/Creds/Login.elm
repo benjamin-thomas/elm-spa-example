@@ -46,7 +46,7 @@ emailInput : Maybe String -> (String -> Msg) -> Html Msg
 emailInput maybeEmail evt =
     let
         email =
-            Maybe.withDefault "hello" maybeEmail
+            Maybe.withDefault "" maybeEmail
     in
     div [ class "input-field" ]
         [ i [ class "material-icons prefix" ] [ text "email" ]

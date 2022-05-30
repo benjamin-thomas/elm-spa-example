@@ -113,14 +113,14 @@ init _ url navKey =
 
 
 type Msg
-    = UrlChanged Url
-    | LinkClicked Browser.UrlRequest
+    = LinkClicked Browser.UrlRequest
+    | UrlChanged Url
+    | LoginMsg Page.Creds.Login.Msg
+    | SignUpMsg Page.Creds.SignUp.Msg
+    | Logout
     | NewPostMsg Page.Post.New.Msg
     | ListPostsMsg Page.Post.List.Msg
     | ShowPostMsg Page.Post.Show.Msg
-    | LoginMsg Page.Creds.Login.Msg
-    | SimulateLogin
-    | Logout
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -150,6 +150,27 @@ update msg model =
         ( UrlChanged url, _ ) ->
             changePage (Route.fromUrl url) model
 
+        ( LoginMsg subMsg, LoginPage subModel ) ->
+            let
+                ( newModel, newCmdMsg ) =
+                    Page.Creds.Login.update
+                        subMsg
+                        subModel
+            in
+            ( { model | user = newModel, page = LoginPage newModel }, Cmd.map LoginMsg newCmdMsg )
+
+        ( SignUpMsg subMsg, SignUpPage subModel ) ->
+            let
+                ( newModel, newCmdMsg ) =
+                    Page.Creds.SignUp.update
+                        subMsg
+                        subModel
+            in
+            ( { model | user = newModel, page = SignUpPage newModel }, Cmd.map SignUpMsg newCmdMsg )
+
+        ( Logout, _ ) ->
+            ( { model | page = Home, user = Page.Creds.Shared.asGuest }, Cmd.none )
+
         ( NewPostMsg subMsg, NewPostPage subModel ) ->
             newPage NewPostPage ( Page.Post.New.update, subMsg, subModel ) NewPostMsg
 
@@ -158,16 +179,6 @@ update msg model =
 
         ( ShowPostMsg subMsg, ShowPostPage subModel ) ->
             newPage ShowPostPage ( Page.Post.Show.update, subMsg, subModel ) ShowPostMsg
-
-        ( LoginMsg subMsg, LoginPage subModel ) ->
-            let
-                ( newModel, newCmdMsg ) =
-                    Page.Creds.Login.update subMsg subModel
-            in
-            ( { model | user = newModel, page = Home }, Cmd.map LoginMsg newCmdMsg )
-
-        ( Logout, _ ) ->
-            ( { model | page = Home, user = Page.Creds.Shared.asGuest }, Cmd.none )
 
         ( _, _ ) ->
             ( { model | page = NotFoundPage }, Cmd.none )
@@ -231,7 +242,7 @@ view model =
             { title = "Login", body = [ Page.Creds.Login.view subModel |> Html.map LoginMsg ] }
 
         SignUpPage subModel ->
-            { title = "Sign up", body = [ Page.Creds.SignUp.view ] }
+            { title = "Sign up", body = [ Page.Creds.SignUp.view subModel |> Html.map SignUpMsg ] }
 
         NewPostPage subModel ->
             { title = "New post"
