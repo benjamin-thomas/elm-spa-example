@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# This triggers elm-live reload
+exec echo ./index2.html | entr touch ./src/Main.elm

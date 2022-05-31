@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec elm-live ./src/Main.elm --start-page=index2.html -- --debug --output=dist/main.js
