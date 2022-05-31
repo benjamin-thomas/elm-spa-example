@@ -122,17 +122,13 @@ type Msg
 decCountDown : Int -> Cmd Msg
 decCountDown n =
     Process.sleep 1000
-        |> Task.perform (\_ -> RedirectOnCountDownZero n)
+        |> Task.perform (\_ -> RedirectOnCountDownZero (n - 1))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        RedirectOnCountDownZero secs ->
-            let
-                remainingSecs =
-                    secs - 1
-            in
+        RedirectOnCountDownZero remainingSecs ->
             if remainingSecs <= 0 then
                 ( model, Nav.pushUrl model.key (Route.path Route.Home) )
 
