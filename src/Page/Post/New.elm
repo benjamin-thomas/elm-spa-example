@@ -59,7 +59,7 @@ type alias Model =
     , title : String
     , body : String
     , notification : Maybe String
-    , countdown : Maybe Int
+    , redirectCountDown : Maybe Int
     }
 
 
@@ -69,7 +69,7 @@ init key =
       , title = ""
       , body = ""
       , notification = Nothing
-      , countdown = Nothing
+      , redirectCountDown = Nothing
       }
     , Cmd.none
     )
@@ -119,8 +119,8 @@ type Msg
     | RedirectOnCountDownZero Int
 
 
-countDownThenSubmit : Int -> Cmd Msg
-countDownThenSubmit n =
+decCountDown : Int -> Cmd Msg
+decCountDown n =
     Process.sleep 1000
         |> Task.perform (\_ -> RedirectOnCountDownZero n)
 
@@ -128,15 +128,23 @@ countDownThenSubmit n =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        RedirectOnCountDownZero n ->
-            if n <= 1 then
+        RedirectOnCountDownZero secs ->
+            let
+                remainingSecs =
+                    secs - 1
+            in
+            if remainingSecs <= 0 then
                 ( model, Nav.pushUrl model.key (Route.path Route.Home) )
 
             else
-                ( { model | countdown = Just (n - 1) }, countDownThenSubmit (n - 1) )
+                ( { model | redirectCountDown = Just remainingSecs }, decCountDown remainingSecs )
 
         FakeSubmit ->
-            ( { model | countdown = Just 3 }, countDownThenSubmit 3 )
+            let
+                secs =
+                    3
+            in
+            ( { model | redirectCountDown = Just secs }, decCountDown secs )
 
         ChangedTitle title ->
             ( { model | title = title }, Cmd.none )
@@ -246,7 +254,7 @@ view model =
             , div []
                 [ button [ class "btn", onClick FakeSubmit ] [ text "Fake submit" ]
                 , p []
-                    [ case model.countdown of
+                    [ case model.redirectCountDown of
                         Nothing ->
                             text <| "Nothing happening here... "
 
