@@ -6,6 +6,7 @@ import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Encode
+import Lorem
 import Process
 import Route
 import Task
@@ -138,7 +139,11 @@ update msg model =
             ( { model | title = title }, Cmd.none )
 
         ChangedBody body ->
-            ( { model | body = body }, Cmd.none )
+            let
+                body2 =
+                    String.replace "lorem!" (Lorem.sentence 10) body
+            in
+            ( { model | body = body2 }, Cmd.none )
 
         Submit ->
             case validate model of
@@ -267,7 +272,7 @@ view model =
                     ]
                 , div [ class "input-field" ]
                     [ textarea
-                        [ placeholder "Enter post here..."
+                        [ placeholder "Type lorem! to add bogus text..."
                         , onInput ChangedBody
                         , value model.body
                         ]
