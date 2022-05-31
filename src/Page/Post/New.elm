@@ -6,6 +6,7 @@ import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Encode as Encode exposing (string)
+import Lorem
 import Process
 import Route
 import Task
@@ -134,7 +135,7 @@ updateFormField formField model =
             ( { model | title = str }, Cmd.none )
 
         Body str ->
-            ( { model | body = str }, Cmd.none )
+            ( { model | body = String.replace "lorem!" (Lorem.sentence 10) str }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
