@@ -1,18 +1,20 @@
 module Page.Creds.SignUp exposing (Model, Msg(..), init, update, view)
 
-import Html exposing (Html, a, div, i, input, text)
+import Browser.Navigation as Nav
+import Html exposing (Html, div, i, input, text)
 import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Page.Creds.Shared exposing (Email(..), User(..), authentication, emailInput, getEmail, passwordAgain, passwordInput)
+import Route
 
 
 type alias Model =
-    User
+    { user : User, key : Nav.Key }
 
 
-init : ( Model, Cmd msg )
-init =
-    ( User (Email "user@example.com"), Cmd.none )
+init : Nav.Key -> ( Model, Cmd msg )
+init key =
+    ( { user = User (Email "user@example.com"), key = key }, Cmd.none )
 
 
 
@@ -28,10 +30,10 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Authenticate ->
-            ( model, Cmd.none )
+            ( model, Nav.pushUrl model.key (Route.path Route.Home) )
 
         ChangeEmail email ->
-            ( User (Email email), Cmd.none )
+            ( { model | user = User (Email email) }, Cmd.none )
 
 
 
@@ -53,7 +55,7 @@ emailInput maybeEmail evt =
 view : Model -> Html Msg
 view model =
     authentication
-        [ emailInput (getEmail model) ChangeEmail
+        [ emailInput (getEmail model.user) ChangeEmail
         , passwordInput
         , passwordAgain
         , input [ class "btn right", type_ "button", value "Login", onClick Authenticate ] []

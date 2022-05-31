@@ -61,7 +61,7 @@ passwordInput : Html msg
 passwordInput =
     div [ class "input-field" ]
         [ i [ class "material-icons prefix" ] [ text "lock" ]
-        , input [ placeholder "Password is not required for this simple example", type_ "password" ] []
+        , input [ placeholder "Not required for this demo", type_ "password" ] []
         ]
 
 

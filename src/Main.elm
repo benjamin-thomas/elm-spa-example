@@ -63,16 +63,16 @@ changePage maybeRoute model =
         Just Route.Login ->
             let
                 ( subModel, subCmdMsg ) =
-                    Page.Creds.Login.init
+                    Page.Creds.Login.init model.key
             in
             ( { model | page = LoginPage subModel }, Cmd.map LoginMsg subCmdMsg )
 
         Just Route.SignUp ->
             let
                 ( subModel, subCmdMsg ) =
-                    Page.Creds.SignUp.init
+                    Page.Creds.SignUp.init model.key
             in
-            ( { model | page = SignUpPage subModel }, Cmd.none )
+            ( { model | page = SignUpPage subModel }, Cmd.map SignUpMsg subCmdMsg )
 
         Just Route.NewPost ->
             let
@@ -157,7 +157,7 @@ update msg model =
                         subMsg
                         subModel
             in
-            ( { model | user = newModel, page = LoginPage newModel }, Cmd.map LoginMsg newCmdMsg )
+            ( { model | user = newModel.user, page = LoginPage newModel }, Cmd.map LoginMsg newCmdMsg )
 
         ( SignUpMsg subMsg, SignUpPage subModel ) ->
             let
@@ -166,7 +166,7 @@ update msg model =
                         subMsg
                         subModel
             in
-            ( { model | user = newModel, page = SignUpPage newModel }, Cmd.map SignUpMsg newCmdMsg )
+            ( { model | user = newModel.user, page = SignUpPage newModel }, Cmd.map SignUpMsg newCmdMsg )
 
         ( Logout, _ ) ->
             ( { model | page = Home, user = Page.Creds.Shared.asGuest }, Cmd.none )
