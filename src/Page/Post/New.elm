@@ -111,9 +111,13 @@ validate model =
         Ok { model | notification = Nothing }
 
 
+type InputField
+    = Title String
+    | Body String
+
+
 type Msg
-    = ChangedTitle String
-    | ChangedBody String
+    = ChangedForm InputField
     | Submit
     | PostData (Result Http.Error ())
     | RedirectOnCountDownZero Int
@@ -125,41 +129,21 @@ decCountDown n =
         |> Task.perform (\_ -> RedirectOnCountDownZero (n - 1))
 
 
-clearFormErrors : Msg -> Model -> Model
-clearFormErrors msg model =
-    case msg of
-        ChangedTitle _ ->
-            { model | notification = Nothing }
+updateFormField formField model =
+    case formField of
+        Title str ->
+            ( { model | title = str }, Cmd.none )
 
-        ChangedBody _ ->
-            { model | notification = Nothing }
-
-        Submit ->
-            model
-
-        PostData _ ->
-            model
-
-        RedirectOnCountDownZero _ ->
-            model
+        Body str ->
+            ( { model | body = str }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model_ =
-    let
-        model =
-            clearFormErrors msg model_
-    in
+update msg model =
     case msg of
-        ChangedTitle title ->
-            ( { model | title = title }, Cmd.none )
-
-        ChangedBody body ->
-            let
-                body2 =
-                    String.replace "lorem!" (Lorem.sentence 10) body
-            in
-            ( { model | body = body2 }, Cmd.none )
+        ChangedForm formField ->
+            updateFormField formField
+                { model | notification = Nothing }
 
         Submit ->
             case validate model of
@@ -288,7 +272,7 @@ view model =
                         [ placeholder "Post Title"
                         , type_ "text"
                         , value model.title
-                        , onInput ChangedTitle
+                        , onInput (\str -> ChangedForm (Title str))
                         ]
                         []
                     , minLengthOrWarn titleMinLength (String.trim model.title)
@@ -296,7 +280,7 @@ view model =
                 , div [ class "input-field" ]
                     [ textarea
                         [ placeholder "Type lorem! to add bogus text..."
-                        , onInput ChangedBody
+                        , onInput (\str -> ChangedForm (Body str))
                         , value model.body
                         ]
                         []
