@@ -5,8 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Json.Encode
-import Lorem
+import Json.Encode as Encode exposing (string)
 import Process
 import Route
 import Task
@@ -37,8 +36,8 @@ bodyMaxLength =
 
 buildBody : Model -> Http.Body
 buildBody model =
-    Json.Encode.object
-        [ ( "title", Json.Encode.string model.title ) ]
+    Encode.object
+        [ ( "title", string model.title ) ]
         |> Http.jsonBody
 
 
