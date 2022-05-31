@@ -58,7 +58,7 @@ type alias Model =
     { key : Nav.Key
     , title : String
     , body : String
-    , notification : Maybe String
+    , errors : List String
     , countDown : Maybe Int
     }
 
@@ -68,7 +68,7 @@ init key =
     ( { key = key
       , title = ""
       , body = ""
-      , notification = Nothing
+      , errors = []
       , countDown = Nothing
       }
     , Cmd.none
@@ -107,7 +107,7 @@ validate model =
         Err "Body rejected: too long!"
 
     else
-        Ok { model | notification = Nothing }
+        Ok { model | errors = [] }
 
 
 type InputField
@@ -142,7 +142,7 @@ update msg model =
     case msg of
         ChangedForm formField ->
             updateFormField formField
-                { model | notification = Nothing }
+                { model | errors = [] }
 
         Submit ->
             case validate model of
@@ -150,7 +150,7 @@ update msg model =
                     ( validModel, postData model )
 
                 Err errMsg ->
-                    ( { model | notification = Just errMsg }, Cmd.none )
+                    ( { model | errors = [ errMsg ] }, Cmd.none )
 
         PostData result ->
             let
@@ -160,8 +160,10 @@ update msg model =
             case result of
                 Ok _ ->
                     ( { model
-                        | notification =
-                            Just "HTTP POST success!\nDo note that the resource is not really updated on the server (but the HTTP call is real)."
+                        | errors =
+                            [ "HTTP POST success!"
+                            , "Do note that the resource is not really updated on the server (but the HTTP call is real)."
+                            ]
                         , title = ""
                         , body = ""
                         , countDown = Just secs
@@ -170,7 +172,7 @@ update msg model =
                     )
 
                 Err _ ->
-                    ( { model | notification = Just "HTTP POST error something went wrong!" }, Cmd.none )
+                    ( { model | errors = [ "HTTP POST error something went wrong!" ] }, Cmd.none )
 
         RedirectOnCountDownZero remainingSecs ->
             if remainingSecs <= 0 then
@@ -254,7 +256,7 @@ view : Model -> Html Msg
 view model =
     main_ [ class "container " ]
         [ div [ class "row" ]
-            [ viewNotification model
+            [ viewErrors model
             , div []
                 [ p []
                     [ case model.countDown of
@@ -299,16 +301,6 @@ view model =
         ]
 
 
-viewNotification : Model -> Html Msg
-viewNotification model =
-    case model.notification of
-        Nothing ->
-            span [] []
-
-        Just notification ->
-            let
-                lines : List String
-                lines =
-                    String.lines notification
-            in
-            List.map (\x -> li [] [ text x ]) lines |> ul []
+viewErrors : Model -> Html Msg
+viewErrors model =
+    List.map (\x -> li [] [ text x ]) model.errors |> ul []
