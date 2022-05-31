@@ -1,10 +1,14 @@
 module Page.Post.New exposing (..)
 
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (class, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Encode
+import Process
+import Route
+import Task
 
 
 
@@ -51,15 +55,24 @@ postData model =
 
 
 type alias Model =
-    { title : String
+    { key : Nav.Key
+    , title : String
     , body : String
     , notification : Maybe String
+    , countdown : Maybe Int
     }
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( Model "" "" Nothing, Cmd.none )
+init : Nav.Key -> ( Model, Cmd Msg )
+init key =
+    ( { key = key
+      , title = ""
+      , body = ""
+      , notification = Nothing
+      , countdown = Nothing
+      }
+    , Cmd.none
+    )
 
 
 
@@ -98,19 +111,37 @@ validate model =
 
 
 type Msg
-    = ChandedTitle String
-    | ChandedBody String
+    = ChangedTitle String
+    | ChangedBody String
     | Submit
     | PostData (Result Http.Error ())
+    | FakeSubmit
+    | RedirectOnCountDownZero Int
+
+
+countDownThenSubmit : Int -> Cmd Msg
+countDownThenSubmit n =
+    Process.sleep 1000
+        |> Task.perform (\_ -> RedirectOnCountDownZero n)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ChandedTitle title ->
+        RedirectOnCountDownZero n ->
+            if n <= 1 then
+                ( model, Nav.pushUrl model.key (Route.path Route.Home) )
+
+            else
+                ( { model | countdown = Just (n - 1) }, countDownThenSubmit (n - 1) )
+
+        FakeSubmit ->
+            ( { model | countdown = Just 3 }, countDownThenSubmit 3 )
+
+        ChangedTitle title ->
             ( { model | title = title }, Cmd.none )
 
-        ChandedBody body ->
+        ChangedBody body ->
             ( { model | body = body }, Cmd.none )
 
         Submit ->
@@ -212,13 +243,24 @@ view model =
     main_ [ class "container " ]
         [ div [ class "row" ]
             [ viewNotification model
+            , div []
+                [ button [ class "btn", onClick FakeSubmit ] [ text "Fake submit" ]
+                , p []
+                    [ case model.countdown of
+                        Nothing ->
+                            text <| "Nothing happening here... "
+
+                        Just n ->
+                            text <| "Redirect in " ++ String.fromInt n ++ "s"
+                    ]
+                ]
             , Html.form [ class "col s12 m8 offset-m2" ]
                 [ div [ class "input-field" ]
                     [ input
                         [ placeholder "Post Title"
                         , type_ "text"
                         , value model.title
-                        , onInput ChandedTitle
+                        , onInput ChangedTitle
                         ]
                         []
                     , minLengthOrWarn titleMinLength (String.trim model.title)
@@ -226,7 +268,7 @@ view model =
                 , div [ class "input-field" ]
                     [ textarea
                         [ placeholder "Enter post here..."
-                        , onInput ChandedBody
+                        , onInput ChangedBody
                         , value model.body
                         ]
                         []

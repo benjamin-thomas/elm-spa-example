@@ -77,7 +77,7 @@ changePage maybeRoute model =
         Just Route.NewPost ->
             let
                 ( subModel, subCmdMsg ) =
-                    Page.Post.New.init
+                    Page.Post.New.init model.key
             in
             ( { model | page = NewPostPage subModel }, Cmd.map NewPostMsg subCmdMsg )
 
