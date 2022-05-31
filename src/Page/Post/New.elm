@@ -125,16 +125,32 @@ decCountDown n =
         |> Task.perform (\_ -> RedirectOnCountDownZero (n - 1))
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+clearFormErrors : Msg -> Model -> Model
+clearFormErrors msg model =
     case msg of
-        RedirectOnCountDownZero remainingSecs ->
-            if remainingSecs <= 0 then
-                ( model, Nav.pushUrl model.key (Route.path Route.Home) )
+        ChangedTitle _ ->
+            { model | notification = Nothing }
 
-            else
-                ( { model | countDown = Just remainingSecs }, decCountDown remainingSecs )
+        ChangedBody _ ->
+            { model | notification = Nothing }
 
+        Submit ->
+            model
+
+        PostData _ ->
+            model
+
+        RedirectOnCountDownZero _ ->
+            model
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model_ =
+    let
+        model =
+            clearFormErrors msg model_
+    in
+    case msg of
         ChangedTitle title ->
             ( { model | title = title }, Cmd.none )
 
@@ -172,6 +188,13 @@ update msg model =
 
                 Err _ ->
                     ( { model | notification = Just "HTTP POST error something went wrong!" }, Cmd.none )
+
+        RedirectOnCountDownZero remainingSecs ->
+            if remainingSecs <= 0 then
+                ( model, Nav.pushUrl model.key (Route.path Route.Home) )
+
+            else
+                ( { model | countDown = Just remainingSecs }, decCountDown remainingSecs )
 
 
 
