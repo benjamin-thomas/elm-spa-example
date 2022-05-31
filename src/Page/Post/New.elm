@@ -59,7 +59,7 @@ type alias Model =
     , title : String
     , body : String
     , notification : Maybe String
-    , redirectCountDown : Maybe Int
+    , countDown : Maybe Int
     }
 
 
@@ -69,7 +69,7 @@ init key =
       , title = ""
       , body = ""
       , notification = Nothing
-      , redirectCountDown = Nothing
+      , countDown = Nothing
       }
     , Cmd.none
     )
@@ -133,14 +133,14 @@ update msg model =
                 ( model, Nav.pushUrl model.key (Route.path Route.Home) )
 
             else
-                ( { model | redirectCountDown = Just remainingSecs }, decCountDown remainingSecs )
+                ( { model | countDown = Just remainingSecs }, decCountDown remainingSecs )
 
         FakeSubmit ->
             let
                 secs =
                     3
             in
-            ( { model | redirectCountDown = Just secs }, decCountDown secs )
+            ( { model | countDown = Just secs }, decCountDown secs )
 
         ChangedTitle title ->
             ( { model | title = title }, Cmd.none )
@@ -250,7 +250,7 @@ view model =
             , div []
                 [ button [ class "btn", onClick FakeSubmit ] [ text "Fake submit" ]
                 , p []
-                    [ case model.redirectCountDown of
+                    [ case model.countDown of
                         Nothing ->
                             text <| "Nothing happening here... "
 
