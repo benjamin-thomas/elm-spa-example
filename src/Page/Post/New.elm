@@ -115,7 +115,6 @@ type Msg
     | ChangedBody String
     | Submit
     | PostData (Result Http.Error ())
-    | FakeSubmit
     | RedirectOnCountDownZero Int
 
 
@@ -135,13 +134,6 @@ update msg model =
             else
                 ( { model | countDown = Just remainingSecs }, decCountDown remainingSecs )
 
-        FakeSubmit ->
-            let
-                secs =
-                    3
-            in
-            ( { model | countDown = Just secs }, decCountDown secs )
-
         ChangedTitle title ->
             ( { model | title = title }, Cmd.none )
 
@@ -157,6 +149,10 @@ update msg model =
                     ( { model | notification = Just errMsg }, Cmd.none )
 
         PostData result ->
+            let
+                secs =
+                    5
+            in
             case result of
                 Ok _ ->
                     ( { model
@@ -164,8 +160,9 @@ update msg model =
                             Just "HTTP POST success!\nDo note that the resource is not really updated on the server (but the HTTP call is real)."
                         , title = ""
                         , body = ""
+                        , countDown = Just secs
                       }
-                    , Cmd.none
+                    , decCountDown secs
                     )
 
                 Err _ ->
@@ -248,11 +245,10 @@ view model =
         [ div [ class "row" ]
             [ viewNotification model
             , div []
-                [ button [ class "btn", onClick FakeSubmit ] [ text "Fake submit" ]
-                , p []
+                [ p []
                     [ case model.countDown of
                         Nothing ->
-                            text <| "Nothing happening here... "
+                            text ""
 
                         Just n ->
                             text <| "Redirect in " ++ String.fromInt n ++ "s"
