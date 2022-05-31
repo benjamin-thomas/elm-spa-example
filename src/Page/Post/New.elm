@@ -60,6 +60,7 @@ type alias Model =
     , title : String
     , body : String
     , errors : List String
+    , notifySuccess : Maybe String
     , countDown : Maybe Int
     }
 
@@ -70,6 +71,7 @@ init key =
       , title = ""
       , body = ""
       , errors = []
+      , notifySuccess = Nothing
       , countDown = Nothing
       }
     , Cmd.none
@@ -161,10 +163,7 @@ update msg model =
             case result of
                 Ok _ ->
                     ( { model
-                        | errors =
-                            [ "HTTP POST success!"
-                            , "Do note that the resource is not really updated on the server (but the HTTP call is real)."
-                            ]
+                        | notifySuccess = Just "HTTP POST success!\nDo note that the resource is not really updated on the server (but the HTTP call is real)."
                         , title = ""
                         , body = ""
                         , countDown = Just secs
@@ -258,6 +257,7 @@ view model =
     main_ [ class "container " ]
         [ div [ class "row" ]
             [ viewErrors model
+            , viewSuccess model
             , div []
                 [ p []
                     [ case model.countDown of
@@ -304,4 +304,24 @@ view model =
 
 viewErrors : Model -> Html Msg
 viewErrors model =
-    List.map (\x -> li [] [ text x ]) model.errors |> ul []
+    if List.isEmpty model.errors then
+        text ""
+
+    else
+        div [ class "materialert error" ]
+            [ div [ class "material-icons" ] [ text "error_outline" ]
+            , List.map (\x -> li [] [ text x ]) model.errors |> ul []
+            ]
+
+
+viewSuccess : Model -> Html msg
+viewSuccess model =
+    case model.notifySuccess of
+        Nothing ->
+            text ""
+
+        Just str ->
+            div [ class "materialert success" ]
+                [ div [ class "material-icons" ] [ text "check" ]
+                , text str
+                ]
