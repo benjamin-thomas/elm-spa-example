@@ -6299,13 +6299,25 @@ var $author$project$Page$Post$Show$init = function (postID) {
 		$author$project$Page$Post$Show$fetchData(postID));
 };
 var $elm$core$Platform$Cmd$map = _Platform_map;
+var $author$project$Main$updateWith = F4(
+	function (toModel, toMsg, model, _v0) {
+		var pageModel = _v0.a;
+		var pageCmd = _v0.b;
+		return _Utils_Tuple2(
+			_Utils_update(
+				model,
+				{
+					m: toModel(pageModel)
+				}),
+			A2($elm$core$Platform$Cmd$map, toMsg, pageCmd));
+	});
 var $author$project$Main$changePage = F2(
 	function (maybeRoute, model) {
 		if (maybeRoute.$ === 1) {
 			return _Utils_Tuple2(
 				_Utils_update(
 					model,
-					{e: $author$project$Main$NotFoundPage}),
+					{m: $author$project$Main$NotFoundPage}),
 				$elm$core$Platform$Cmd$none);
 		} else {
 			switch (maybeRoute.a.$) {
@@ -6314,68 +6326,43 @@ var $author$project$Main$changePage = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{e: $author$project$Main$Home}),
+							{m: $author$project$Main$Home}),
 						$elm$core$Platform$Cmd$none);
 				case 1:
 					var _v2 = maybeRoute.a;
-					var _v3 = $author$project$Page$Creds$Login$init(model.B);
-					var subModel = _v3.a;
-					var subCmdMsg = _v3.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								e: $author$project$Main$LoginPage(subModel)
-							}),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, subCmdMsg));
+					return A4(
+						$author$project$Main$updateWith,
+						$author$project$Main$LoginPage,
+						$author$project$Main$LoginMsg,
+						model,
+						$author$project$Page$Creds$Login$init(model.B));
 				case 2:
-					var _v4 = maybeRoute.a;
-					var _v5 = $author$project$Page$Creds$SignUp$init(model.B);
-					var subModel = _v5.a;
-					var subCmdMsg = _v5.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								e: $author$project$Main$SignUpPage(subModel)
-							}),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$SignUpMsg, subCmdMsg));
+					var _v3 = maybeRoute.a;
+					return A4(
+						$author$project$Main$updateWith,
+						$author$project$Main$SignUpPage,
+						$author$project$Main$SignUpMsg,
+						model,
+						$author$project$Page$Creds$SignUp$init(model.B));
 				case 3:
-					var _v6 = maybeRoute.a;
-					var _v7 = $author$project$Page$Post$New$init(model.B);
-					var subModel = _v7.a;
-					var subCmdMsg = _v7.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								e: $author$project$Main$NewPostPage(subModel)
-							}),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$NewPostMsg, subCmdMsg));
+					var _v4 = maybeRoute.a;
+					return A4(
+						$author$project$Main$updateWith,
+						$author$project$Main$NewPostPage,
+						$author$project$Main$NewPostMsg,
+						model,
+						$author$project$Page$Post$New$init(model.B));
 				case 4:
-					var _v8 = maybeRoute.a;
-					var _v9 = $author$project$Page$Post$List$init;
-					var subModel = _v9.a;
-					var subCmdMsg = _v9.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								e: $author$project$Main$ListPostsPage(subModel)
-							}),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$ListPostsMsg, subCmdMsg));
+					var _v5 = maybeRoute.a;
+					return A4($author$project$Main$updateWith, $author$project$Main$ListPostsPage, $author$project$Main$ListPostsMsg, model, $author$project$Page$Post$List$init);
 				default:
 					var id = maybeRoute.a.a;
-					var _v10 = $author$project$Page$Post$Show$init(id);
-					var subModel = _v10.a;
-					var subCmdMsg = _v10.b;
-					return _Utils_Tuple2(
-						_Utils_update(
-							model,
-							{
-								e: $author$project$Main$ShowPostPage(subModel)
-							}),
-						A2($elm$core$Platform$Cmd$map, $author$project$Main$ShowPostMsg, subCmdMsg));
+					return A4(
+						$author$project$Main$updateWith,
+						$author$project$Main$ShowPostPage,
+						$author$project$Main$ShowPostMsg,
+						model,
+						$author$project$Page$Post$Show$init(id));
 			}
 		}
 	});
@@ -6674,7 +6661,7 @@ var $author$project$Route$fromUrl = function (url) {
 };
 var $author$project$Main$init = F3(
 	function (_v0, url, navKey) {
-		var initModel = {B: navKey, e: $author$project$Main$NotFoundPage, t: $author$project$Page$Creds$Shared$asGuest};
+		var initModel = {B: navKey, m: $author$project$Main$NotFoundPage, t: $author$project$Page$Creds$Shared$asGuest};
 		return A2(
 			$author$project$Main$changePage,
 			$author$project$Route$fromUrl(url),
@@ -7180,23 +7167,7 @@ var $author$project$Page$Post$Show$update = F2(
 	});
 var $author$project$Main$update = F2(
 	function (msg, model) {
-		var newPage = F3(
-			function (nextPage, _v6, currMsg) {
-				var subUpdate = _v6.a;
-				var subMsg = _v6.b;
-				var subModel = _v6.c;
-				var _v5 = A2(subUpdate, subMsg, subModel);
-				var newModel = _v5.a;
-				var newCmdMsg = _v5.b;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							e: nextPage(newModel)
-						}),
-					A2($elm$core$Platform$Cmd$map, currMsg, newCmdMsg));
-			});
-		var _v0 = _Utils_Tuple2(msg, model.e);
+		var _v0 = _Utils_Tuple2(msg, model.m);
 		_v0$8:
 		while (true) {
 			switch (_v0.a.$) {
@@ -7229,14 +7200,14 @@ var $author$project$Main$update = F2(
 						var _v2 = A2($author$project$Page$Creds$Login$update, subMsg, subModel);
 						var newModel = _v2.a;
 						var newCmdMsg = _v2.b;
-						return _Utils_Tuple2(
+						return A4(
+							$author$project$Main$updateWith,
+							$author$project$Main$LoginPage,
+							$author$project$Main$LoginMsg,
 							_Utils_update(
 								model,
-								{
-									e: $author$project$Main$LoginPage(newModel),
-									t: newModel.t
-								}),
-							A2($elm$core$Platform$Cmd$map, $author$project$Main$LoginMsg, newCmdMsg));
+								{t: newModel.t}),
+							_Utils_Tuple2(newModel, newCmdMsg));
 					} else {
 						break _v0$8;
 					}
@@ -7247,14 +7218,14 @@ var $author$project$Main$update = F2(
 						var _v3 = A2($author$project$Page$Creds$SignUp$update, subMsg, subModel);
 						var newModel = _v3.a;
 						var newCmdMsg = _v3.b;
-						return _Utils_Tuple2(
+						return A4(
+							$author$project$Main$updateWith,
+							$author$project$Main$SignUpPage,
+							$author$project$Main$SignUpMsg,
 							_Utils_update(
 								model,
-								{
-									e: $author$project$Main$SignUpPage(newModel),
-									t: newModel.t
-								}),
-							A2($elm$core$Platform$Cmd$map, $author$project$Main$SignUpMsg, newCmdMsg));
+								{t: newModel.t}),
+							_Utils_Tuple2(newModel, newCmdMsg));
 					} else {
 						break _v0$8;
 					}
@@ -7263,17 +7234,18 @@ var $author$project$Main$update = F2(
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{e: $author$project$Main$Home, t: $author$project$Page$Creds$Shared$asGuest}),
+							{m: $author$project$Main$Home, t: $author$project$Page$Creds$Shared$asGuest}),
 						$elm$core$Platform$Cmd$none);
 				case 5:
 					if (_v0.b.$ === 3) {
 						var subMsg = _v0.a.a;
 						var subModel = _v0.b.a;
-						return A3(
-							newPage,
+						return A4(
+							$author$project$Main$updateWith,
 							$author$project$Main$NewPostPage,
-							_Utils_Tuple3($author$project$Page$Post$New$update, subMsg, subModel),
-							$author$project$Main$NewPostMsg);
+							$author$project$Main$NewPostMsg,
+							model,
+							A2($author$project$Page$Post$New$update, subMsg, subModel));
 					} else {
 						break _v0$8;
 					}
@@ -7281,11 +7253,12 @@ var $author$project$Main$update = F2(
 					if (_v0.b.$ === 4) {
 						var subMsg = _v0.a.a;
 						var subModel = _v0.b.a;
-						return A3(
-							newPage,
+						return A4(
+							$author$project$Main$updateWith,
 							$author$project$Main$ListPostsPage,
-							_Utils_Tuple3($author$project$Page$Post$List$update, subMsg, subModel),
-							$author$project$Main$ListPostsMsg);
+							$author$project$Main$ListPostsMsg,
+							model,
+							A2($author$project$Page$Post$List$update, subMsg, subModel));
 					} else {
 						break _v0$8;
 					}
@@ -7293,11 +7266,12 @@ var $author$project$Main$update = F2(
 					if (_v0.b.$ === 5) {
 						var subMsg = _v0.a.a;
 						var subModel = _v0.b.a;
-						return A3(
-							newPage,
+						return A4(
+							$author$project$Main$updateWith,
 							$author$project$Main$ShowPostPage,
-							_Utils_Tuple3($author$project$Page$Post$Show$update, subMsg, subModel),
-							$author$project$Main$ShowPostMsg);
+							$author$project$Main$ShowPostMsg,
+							model,
+							A2($author$project$Page$Post$Show$update, subMsg, subModel));
 					} else {
 						break _v0$8;
 					}
@@ -7306,7 +7280,7 @@ var $author$project$Main$update = F2(
 		return _Utils_Tuple2(
 			_Utils_update(
 				model,
-				{e: $author$project$Main$NotFoundPage}),
+				{m: $author$project$Main$NotFoundPage}),
 			$elm$core$Platform$Cmd$none);
 	});
 var $elm$html$Html$a = _VirtualDom_node('a');
@@ -8320,7 +8294,7 @@ var $author$project$Main$view = function (model) {
 						$author$project$Main$navBarItems(model.t))
 					]))
 			]));
-	var _v0 = model.e;
+	var _v0 = model.m;
 	switch (_v0.$) {
 		case 0:
 			return {
