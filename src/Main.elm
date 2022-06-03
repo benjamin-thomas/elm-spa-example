@@ -223,39 +223,24 @@ changePage maybeRoute model =
             ( { model | page = Home }, Cmd.none )
 
         Just Route.Login ->
-            let
-                ( subModel, subCmdMsg ) =
-                    Page.Creds.Login.init model.key
-            in
-            ( { model | page = LoginPage subModel }, Cmd.map LoginMsg subCmdMsg )
+            Page.Creds.Login.init model.key
+                |> updateWith LoginPage LoginMsg model
 
         Just Route.SignUp ->
-            let
-                ( subModel, subCmdMsg ) =
-                    Page.Creds.SignUp.init model.key
-            in
-            ( { model | page = SignUpPage subModel }, Cmd.map SignUpMsg subCmdMsg )
+            Page.Creds.SignUp.init model.key
+                |> updateWith SignUpPage SignUpMsg model
 
         Just Route.NewPost ->
-            let
-                ( subModel, subCmdMsg ) =
-                    Page.Post.New.init model.key
-            in
-            ( { model | page = NewPostPage subModel }, Cmd.map NewPostMsg subCmdMsg )
+            Page.Post.New.init model.key
+                |> updateWith NewPostPage NewPostMsg model
 
         Just Route.ListPosts ->
-            let
-                ( subModel, subCmdMsg ) =
-                    Page.Post.List.init
-            in
-            ( { model | page = ListPostsPage subModel }, Cmd.map ListPostsMsg subCmdMsg )
+            Page.Post.List.init
+                |> updateWith ListPostsPage ListPostsMsg model
 
         Just (Route.ShowPost id) ->
-            let
-                ( subModel, subCmdMsg ) =
-                    Page.Post.Show.init id
-            in
-            ( { model | page = ShowPostPage subModel }, Cmd.map ShowPostMsg subCmdMsg )
+            Page.Post.Show.init id
+                |> updateWith ShowPostPage ShowPostMsg model
 
 
 
