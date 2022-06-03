@@ -125,19 +125,6 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    let
-        newPage :
-            (model -> Page)
-            -> ( msg -> model -> ( model, Cmd msg ), msg, model )
-            -> (msg -> Msg)
-            -> ( Model, Cmd Msg )
-        newPage nextPage ( subUpdate, subMsg, subModel ) currMsg =
-            let
-                ( newModel, newCmdMsg ) =
-                    subUpdate subMsg subModel
-            in
-            ( { model | page = nextPage newModel }, Cmd.map currMsg newCmdMsg )
-    in
     case ( msg, model.page ) of
         ( LinkClicked urlRequest, _ ) ->
             case urlRequest of
@@ -151,34 +138,27 @@ update msg model =
             changePage (Route.fromUrl url) model
 
         ( LoginMsg subMsg, LoginPage subModel ) ->
-            let
-                ( newModel, newCmdMsg ) =
-                    Page.Creds.Login.update
-                        subMsg
-                        subModel
-            in
-            ( { model | user = newModel.user, page = LoginPage newModel }, Cmd.map LoginMsg newCmdMsg )
+            Page.Creds.Login.update subMsg subModel
+                |> updateWith LoginPage LoginMsg model
 
         ( SignUpMsg subMsg, SignUpPage subModel ) ->
-            let
-                ( newModel, newCmdMsg ) =
-                    Page.Creds.SignUp.update
-                        subMsg
-                        subModel
-            in
-            ( { model | user = newModel.user, page = SignUpPage newModel }, Cmd.map SignUpMsg newCmdMsg )
+            Page.Creds.SignUp.update subMsg subModel
+                |> updateWith SignUpPage SignUpMsg model
 
         ( Logout, _ ) ->
             ( { model | page = Home, user = Page.Creds.Shared.asGuest }, Cmd.none )
 
         ( NewPostMsg subMsg, NewPostPage subModel ) ->
-            newPage NewPostPage ( Page.Post.New.update, subMsg, subModel ) NewPostMsg
+            Page.Post.New.update subMsg subModel
+                |> updateWith NewPostPage NewPostMsg model
 
         ( ListPostsMsg subMsg, ListPostsPage subModel ) ->
-            newPage ListPostsPage ( Page.Post.List.update, subMsg, subModel ) ListPostsMsg
+            Page.Post.List.update subMsg subModel
+                |> updateWith ListPostsPage ListPostsMsg model
 
         ( ShowPostMsg subMsg, ShowPostPage subModel ) ->
-            newPage ShowPostPage ( Page.Post.Show.update, subMsg, subModel ) ShowPostMsg
+            Page.Post.Show.update subMsg subModel
+                |> updateWith ShowPostPage ShowPostMsg model
 
         ( _, _ ) ->
             ( { model | page = NotFoundPage }, Cmd.none )
@@ -272,3 +252,67 @@ view model =
                 , p [] [ text "Go back to ", a [ href <| Route.path Route.Home ] [ text "HOME" ] ]
                 ]
             }
+
+
+
+-- HELPERS
+{-
+
+      updateWith is a helper function whose purpose is to tidy the boilerplate in update.
+
+      To clean things up, the next page's update function is applied directly with Main's update,
+      and the result is given to updateWith
+
+      More info here: https://discourse.elm-lang.org/t/pls-review-my-basic-spa-example/8425/9?u=benjamin-thomas
+
+
+      update : Msg -> Model -> ( Model, Cmd Msg )
+      update msg model =
+
+          case ( msg, model.page ) of
+
+          ( LoginMsg subMsg, LoginPage subModel ) ->
+              let
+                  ( newModel, newCmdMsg ) =
+                      Page.Creds.Login.update
+                          subMsg
+                          subModel
+              in
+              ( { model | user = newModel.user, page = LoginPage newModel }, Cmd.map LoginMsg newCmdMsg )
+
+
+          ( LoginMsg subMsg, LoginPage subModel ) ->
+              Page.Creds.Login.update subMsg subModel
+                  |> updateWith LoginPage LoginMsg model
+
+
+
+   Another way to look at things, keeping for ref
+
+          ( ShowPostMsg subMsg, ShowPostPage subModel ) ->
+              --
+              -- ORIG
+              -- newPage ShowPostPage ( Page.Post.Show.update, subMsg, subModel ) ShowPostMsg
+              --
+              -- EXPANDED
+              -- let
+              --     ( newModel, newCmdMsg ) =
+              --         Page.Post.Show.update subMsg subModel
+              -- in
+              -- updateWith ShowPostPage ShowPostMsg model ( newModel, newCmdMsg )
+              --
+              -- SIMPLIFIED
+              -- Page.Post.Show.update subMsg subModel
+                      -- |> updateWith ShowPostPage ShowPostMsg model
+
+-}
+
+
+updateWith :
+    (model -> Page)
+    -> (msg -> Msg)
+    -> Model
+    -> ( model, Cmd msg )
+    -> ( Model, Cmd Msg )
+updateWith toModel toMsg model ( pageModel, pageCmd ) =
+    ( { model | page = toModel pageModel }, Cmd.map toMsg pageCmd )
