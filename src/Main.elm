@@ -51,51 +51,6 @@ type alias Model =
     { key : Nav.Key, page : Page, user : Page.Creds.Shared.User }
 
 
-changePage : Maybe Route -> Model -> ( Model, Cmd Msg )
-changePage maybeRoute model =
-    case maybeRoute of
-        Nothing ->
-            ( { model | page = NotFoundPage }, Cmd.none )
-
-        Just Route.Home ->
-            ( { model | page = Home }, Cmd.none )
-
-        Just Route.Login ->
-            let
-                ( subModel, subCmdMsg ) =
-                    Page.Creds.Login.init model.key
-            in
-            ( { model | page = LoginPage subModel }, Cmd.map LoginMsg subCmdMsg )
-
-        Just Route.SignUp ->
-            let
-                ( subModel, subCmdMsg ) =
-                    Page.Creds.SignUp.init model.key
-            in
-            ( { model | page = SignUpPage subModel }, Cmd.map SignUpMsg subCmdMsg )
-
-        Just Route.NewPost ->
-            let
-                ( subModel, subCmdMsg ) =
-                    Page.Post.New.init model.key
-            in
-            ( { model | page = NewPostPage subModel }, Cmd.map NewPostMsg subCmdMsg )
-
-        Just Route.ListPosts ->
-            let
-                ( subModel, subCmdMsg ) =
-                    Page.Post.List.init
-            in
-            ( { model | page = ListPostsPage subModel }, Cmd.map ListPostsMsg subCmdMsg )
-
-        Just (Route.ShowPost id) ->
-            let
-                ( subModel, subCmdMsg ) =
-                    Page.Post.Show.init id
-            in
-            ( { model | page = ShowPostPage subModel }, Cmd.map ShowPostMsg subCmdMsg )
-
-
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ url navKey =
     let
@@ -256,6 +211,54 @@ view model =
 
 
 -- HELPERS
+
+
+changePage : Maybe Route -> Model -> ( Model, Cmd Msg )
+changePage maybeRoute model =
+    case maybeRoute of
+        Nothing ->
+            ( { model | page = NotFoundPage }, Cmd.none )
+
+        Just Route.Home ->
+            ( { model | page = Home }, Cmd.none )
+
+        Just Route.Login ->
+            let
+                ( subModel, subCmdMsg ) =
+                    Page.Creds.Login.init model.key
+            in
+            ( { model | page = LoginPage subModel }, Cmd.map LoginMsg subCmdMsg )
+
+        Just Route.SignUp ->
+            let
+                ( subModel, subCmdMsg ) =
+                    Page.Creds.SignUp.init model.key
+            in
+            ( { model | page = SignUpPage subModel }, Cmd.map SignUpMsg subCmdMsg )
+
+        Just Route.NewPost ->
+            let
+                ( subModel, subCmdMsg ) =
+                    Page.Post.New.init model.key
+            in
+            ( { model | page = NewPostPage subModel }, Cmd.map NewPostMsg subCmdMsg )
+
+        Just Route.ListPosts ->
+            let
+                ( subModel, subCmdMsg ) =
+                    Page.Post.List.init
+            in
+            ( { model | page = ListPostsPage subModel }, Cmd.map ListPostsMsg subCmdMsg )
+
+        Just (Route.ShowPost id) ->
+            let
+                ( subModel, subCmdMsg ) =
+                    Page.Post.Show.init id
+            in
+            ( { model | page = ShowPostPage subModel }, Cmd.map ShowPostMsg subCmdMsg )
+
+
+
 {-
 
       updateWith is a helper function whose purpose is to tidy the boilerplate in update.
