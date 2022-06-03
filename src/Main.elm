@@ -93,12 +93,18 @@ update msg model =
             changePage (Route.fromUrl url) model
 
         ( LoginMsg subMsg, LoginPage subModel ) ->
-            Page.Creds.Login.update subMsg subModel
-                |> updateWith LoginPage LoginMsg model
+            let
+                ( newModel, newCmdMsg ) =
+                    Page.Creds.Login.update subMsg subModel
+            in
+            updateWith LoginPage LoginMsg { model | user = newModel.user } ( newModel, newCmdMsg )
 
         ( SignUpMsg subMsg, SignUpPage subModel ) ->
-            Page.Creds.SignUp.update subMsg subModel
-                |> updateWith SignUpPage SignUpMsg model
+            let
+                ( newModel, newCmdMsg ) =
+                    Page.Creds.SignUp.update subMsg subModel
+            in
+            updateWith SignUpPage SignUpMsg { model | user = newModel.user } ( newModel, newCmdMsg )
 
         ( Logout, _ ) ->
             ( { model | page = Home, user = Page.Creds.Shared.asGuest }, Cmd.none )
